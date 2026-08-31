@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'MihoyoZenZero';
+  src: url('font/mihoyo-zenzero.ttf') format('truetype');
+}
+
 :root {
   --bg:      #f4f4f9;
   --surface: #ffffff;
@@ -7,7 +12,7 @@
   --muted:   #888888;
   --border:  #dddddd;
   --gold:    #aa8800;
-  --font:    'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+  --font:    'MihoyoZenZero', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -66,7 +71,7 @@ header h1 {
 
 main {
   flex: 1;
-  max-width: 560px;
+  max-width: 840px;
   width: 100%;
   margin: 0 auto;
   padding: 20px 16px;
@@ -110,17 +115,66 @@ main {
   margin-bottom: 12px;
 }
 
-.item-list {
+.site-group-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-.item-card {
+.site-group {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  padding: 14px 16px;
+  overflow: hidden;
+}
+
+.site-group-header {
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+}
+.site-group-header::-webkit-details-marker { display: none; }
+.site-group-header::after {
+  content: '▼';
+  font-size: 0.7rem;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+.site-group[open] .site-group-header::after { transform: rotate(180deg); }
+
+.site-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.item-cost {
+  flex-shrink: 0;
+  font-weight: bold;
+  color: var(--gold);
+  font-size: 1.1rem;
+  min-width: 56px;
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .item-title {
@@ -135,20 +189,8 @@ main {
   line-height: 1.4;
 }
 
-.item-foot {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.item-cost {
-  font-weight: bold;
-  color: var(--gold);
-  font-size: 0.95rem;
-}
-
 .item-redeem-btn {
+  flex-shrink: 0;
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: bold;
@@ -163,6 +205,15 @@ main {
   background: var(--surface2);
   color: var(--muted);
   cursor: default;
+}
+
+.site-footer {
+  text-align: center;
+  padding: 26px 16px 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 .twitter-icon {
