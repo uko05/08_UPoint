@@ -172,6 +172,11 @@ main {
   min-width: 56px;
 }
 
+.item-cost-unit {
+  margin-left: 1px;
+  color: var(--muted);
+}
+
 .item-info {
   flex: 1;
   min-width: 0;
@@ -187,6 +192,12 @@ main {
   font-size: 0.78rem;
   color: var(--muted);
   line-height: 1.4;
+}
+
+.item-limit {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: var(--muted);
 }
 
 .item-redeem-btn {

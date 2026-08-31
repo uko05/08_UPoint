@@ -4,7 +4,7 @@
 
 import { db } from './firebaseConfig.js';
 import {
-  doc, onSnapshot, runTransaction,
+  doc, onSnapshot, runTransaction, increment,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 // ===== ユーザーID(uko05.github.io配下の全サイト共通のlocalStorageキー) =====
@@ -20,25 +20,23 @@ function getUserId() {
   return id;
 }
 
-function todayDateStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 // ===== 交換アイテム一覧(データ駆動。サイトごとにグループ化して表示する。
 // 増やす時はSITE_GROUPSに新しいグループ/アイテムを足すだけでよい想定) =====
 // siteKey/perkField: 対象サイトのomikujiUsers/{userId}.sitePerks.{siteKey}.{perkField}に
-// 書き込む値。各サイト側はこのフィールドを見て、今日限定の上乗せとして扱う。
+// 永続的に加算していく値。各サイト側はこのフィールドをそのまま自分の基礎値に
+// 上乗せして使う(日付リセットは無い、ずっと効き続ける特典)。
+// maxRedemptions: 1人が生涯に交換できる回数の上限。nullなら無制限。
 const SITE_GROUPS = [
   {
     siteKey: 'friendBoard',
     siteNameKey: 'siteFriendBoard',
     items: [
       {
-        id: 'friendboard_chat_plus1',
-        perkField: 'extraChatToday',
-        amount: 1,
+        id: 'friendboard_chat_plus5',
+        perkField: 'permanentExtraChat',
+        amount: 5,
         cost: 50,
+        maxRedemptions: null,
         titleKey: 'itemFriendBoardChatTitle',
         descKey: 'itemFriendBoardChatDesc',
       },
@@ -64,9 +62,13 @@ const i18n = {
     redeemInsufficientPoints: 'UPが足りません。',
     redeemNoUserDoc: 'まだUPがありません。原神おみくじでいいねをしてUPを貯めてから来てください。',
     redeemFail: '交換に失敗しました。時間をおいて再度お試しください。',
+    redeemLimitReached: 'この特典はもう交換できません（交換上限に達しています）。',
+    limitNone: '交換上限：なし',
+    limitRemaining: (max, remaining) => `交換上限：${max}回（あと${remaining}回）`,
+    limitReached: '交換上限に達しました',
     siteFriendBoard: '＃原神フレンド承認板',
-    itemFriendBoardChatTitle: '今日のチャット送信可能数 +1',
-    itemFriendBoardChatDesc: '友達募集サイトで、今日1日だけチャットの送信可能数を+1します(0時にリセット)。',
+    itemFriendBoardChatTitle: 'チャット送信可能数 ＋5',
+    itemFriendBoardChatDesc: '友達募集サイトのチャット送信可能数を永続的に+5します(何回でも交換できます)。',
   },
   en: {
     pageTitle: 'Uko Point Exchange',
@@ -81,9 +83,13 @@ const i18n = {
     redeemInsufficientPoints: 'Not enough UP.',
     redeemNoUserDoc: "You don't have any UP yet. Like some results on Genshin Omikuji first to earn UP.",
     redeemFail: 'Redemption failed. Please try again later.',
+    redeemLimitReached: "You've already reached the redemption limit for this perk.",
+    limitNone: 'Redemption limit: none',
+    limitRemaining: (max, remaining) => `Redemption limit: ${max} (${remaining} left)`,
+    limitReached: 'Redemption limit reached',
     siteFriendBoard: '#Genshin Friend Approval Board',
-    itemFriendBoardChatTitle: '+1 chat message today',
-    itemFriendBoardChatDesc: "Adds +1 to today's chat message limit on the friend board (resets at midnight).",
+    itemFriendBoardChatTitle: 'Chat message limit +5',
+    itemFriendBoardChatDesc: "Permanently adds +5 to the friend board's chat message limit (can be redeemed any number of times).",
   },
 };
 function currentLang() {
@@ -114,10 +120,13 @@ function initLangSwitch() {
 
 // ===== 所持UPのリアルタイム表示 =====
 let latestUkoPoints = 0;
+let latestRedemptionCounts = {};
 function startBalanceListener() {
   const el = document.getElementById('balance-count');
   onSnapshot(doc(db, 'omikujiUsers', getUserId()), (snap) => {
-    latestUkoPoints = snap.exists() ? (snap.data().ukoPoints || 0) : 0;
+    const data = snap.exists() ? snap.data() : {};
+    latestUkoPoints = data.ukoPoints || 0;
+    latestRedemptionCounts = data.redemptionCounts || {};
     if (el) el.textContent = latestUkoPoints;
     renderSiteGroups();
   }, (e) => console.error('[upoint] balance listen failed', e));
@@ -129,9 +138,18 @@ function buildItemCard(item, siteKey) {
   const card = document.createElement('div');
   card.className = 'item-card';
 
+  const redeemedCount = latestRedemptionCounts[item.id] || 0;
+  const limitReached = item.maxRedemptions != null && redeemedCount >= item.maxRedemptions;
+
   const cost = document.createElement('span');
   cost.className = 'item-cost';
-  cost.textContent = t.costLabel(item.cost);
+  const costNum = document.createElement('span');
+  costNum.textContent = item.cost;
+  const costUnit = document.createElement('span');
+  costUnit.className = 'item-cost-unit';
+  costUnit.textContent = 'UP';
+  cost.appendChild(costNum);
+  cost.appendChild(costUnit);
   card.appendChild(cost);
 
   const info = document.createElement('div');
@@ -144,13 +162,23 @@ function buildItemCard(item, siteKey) {
   desc.className = 'item-desc';
   desc.textContent = t[item.descKey];
   info.appendChild(desc);
+  const limit = document.createElement('p');
+  limit.className = 'item-limit';
+  if (item.maxRedemptions == null) {
+    limit.textContent = t.limitNone;
+  } else if (limitReached) {
+    limit.textContent = t.limitReached;
+  } else {
+    limit.textContent = t.limitRemaining(item.maxRedemptions, item.maxRedemptions - redeemedCount);
+  }
+  info.appendChild(limit);
   card.appendChild(info);
 
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'item-redeem-btn';
   btn.textContent = t.redeemBtn;
-  btn.disabled = latestUkoPoints < item.cost;
+  btn.disabled = latestUkoPoints < item.cost || limitReached;
   btn.addEventListener('click', () => handleRedeem(item, siteKey));
   card.appendChild(btn);
 
@@ -193,7 +221,6 @@ async function handleRedeem(item, siteKey) {
 
   const userId = getUserId();
   const ref = doc(db, 'omikujiUsers', userId);
-  const todayStr = todayDateStr();
 
   try {
     await runTransaction(db, async (tx) => {
@@ -203,15 +230,17 @@ async function handleRedeem(item, siteKey) {
       const points = data.ukoPoints || 0;
       if (points < item.cost) throw new Error('INSUFFICIENT_POINTS');
 
-      const currentPerk = data.sitePerks?.[siteKey];
-      const currentAmount = (currentPerk && currentPerk.forDate === todayStr) ? (currentPerk[item.perkField] || 0) : 0;
+      const redeemedCount = data.redemptionCounts?.[item.id] || 0;
+      if (item.maxRedemptions != null && redeemedCount >= item.maxRedemptions) {
+        throw new Error('REDEMPTION_LIMIT_REACHED');
+      }
 
+      // 永続的に効く特典なので、対象サイト側のフィールドへそのまま加算していく
+      // (日付での期限切れは無い)。
       tx.update(ref, {
-        ukoPoints: points - item.cost,
-        [`sitePerks.${siteKey}`]: {
-          [item.perkField]: currentAmount + item.amount,
-          forDate: todayStr,
-        },
+        ukoPoints: increment(-item.cost),
+        [`sitePerks.${siteKey}.${item.perkField}`]: increment(item.amount),
+        [`redemptionCounts.${item.id}`]: increment(1),
       });
     });
     showToast(t.redeemSuccess(title), false);
@@ -220,6 +249,8 @@ async function handleRedeem(item, siteKey) {
       showToast(t.redeemNoUserDoc, true);
     } else if (e.message === 'INSUFFICIENT_POINTS') {
       showToast(t.redeemInsufficientPoints, true);
+    } else if (e.message === 'REDEMPTION_LIMIT_REACHED') {
+      showToast(t.redeemLimitReached, true);
     } else {
       console.error('[upoint] redeem failed', e);
       showToast(t.redeemFail, true);
