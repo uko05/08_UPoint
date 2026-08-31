@@ -30,7 +30,7 @@ const SITE_GROUPS = [
   {
     siteKey: 'friendBoard',
     siteNameKey: 'siteFriendBoard',
-    headerBg: '#fff8e1', // FriendBoardのテーマカラー(#ffcc00)のうっすら版
+    headerBg: '#fff8e1', // うっすら黄色
     items: [
       {
         id: 'friendboard_chat_plus5',
@@ -40,6 +40,38 @@ const SITE_GROUPS = [
         maxRedemptions: null,
         titleKey: 'itemFriendBoardChatTitle',
         descKey: 'itemFriendBoardChatDesc',
+      },
+    ],
+  },
+  {
+    siteKey: 'accountCenter',
+    siteNameKey: 'siteAccountCenter',
+    headerBg: '#e8f0fe', // うっすら青
+    items: [
+      {
+        id: 'accountcenter_achievement_setting',
+        perkField: 'achievementSettingUnlocked',
+        perkType: 'flag',
+        cost: 50,
+        maxRedemptions: 1,
+        titleKey: 'itemAccountAchSettingTitle',
+        descKey: 'itemAccountAchSettingDesc',
+      },
+    ],
+  },
+  {
+    siteKey: 'omikuji',
+    siteNameKey: 'siteOmikuji',
+    headerBg: '#fff3e0', // うっすら橙
+    items: [
+      {
+        id: 'omikuji_achievement_display',
+        perkField: 'achievementDisplayUnlocked',
+        perkType: 'flag',
+        cost: 50,
+        maxRedemptions: 1,
+        titleKey: 'itemOmikujiAchDisplayTitle',
+        descKey: 'itemOmikujiAchDisplayDesc',
       },
     ],
   },
@@ -70,6 +102,12 @@ const i18n = {
     siteFriendBoard: '＃原神フレンド承認板',
     itemFriendBoardChatTitle: 'チャット送信可能数 ＋5',
     itemFriendBoardChatDesc: '友達募集サイトのチャット送信可能数を永続的に+5します(何回でも交換できます)。',
+    siteAccountCenter: 'アカウント管理',
+    itemAccountAchSettingTitle: 'アチーブメント設定を解放',
+    itemAccountAchSettingDesc: 'アカウント管理画面で、持っている実績の中から1つ選んで称号として設定できるようになります。',
+    siteOmikuji: '原神おみくじ',
+    itemOmikujiAchDisplayTitle: 'アチーブメント表示を解放',
+    itemOmikujiAchDisplayDesc: 'アカウント管理で設定した称号が、おみくじの「みんなの結果」であなたの名前の横に表示されるようになります。',
   },
   en: {
     pageTitle: 'Uko Point Exchange',
@@ -91,6 +129,12 @@ const i18n = {
     siteFriendBoard: '#Genshin Friend Approval Board',
     itemFriendBoardChatTitle: 'Chat message limit +5',
     itemFriendBoardChatDesc: "Permanently adds +5 to the friend board's chat message limit (can be redeemed any number of times).",
+    siteAccountCenter: 'Account Center',
+    itemAccountAchSettingTitle: 'Unlock Achievement Setting',
+    itemAccountAchSettingDesc: 'Lets you pick one of your earned achievements as a title on the Account Center page.',
+    siteOmikuji: 'Genshin Omikuji',
+    itemOmikujiAchDisplayTitle: 'Unlock Achievement Display',
+    itemOmikujiAchDisplayDesc: "Shows the title you set on Account Center next to your name on Omikuji's \"Everyone's Results\" feed.",
   },
 };
 function currentLang() {
@@ -244,10 +288,12 @@ async function handleRedeem(item, siteKey) {
       }
 
       // 永続的に効く特典なので、対象サイト側のフィールドへそのまま加算していく
-      // (日付での期限切れは無い)。
+      // (日付での期限切れは無い)。perkType:'flag'の項目は数値加算ではなく
+      // true を直接立てるだけの一度きりの解放フラグとして扱う。
+      const perkValue = item.perkType === 'flag' ? true : increment(item.amount);
       tx.update(ref, {
         ukoPoints: increment(-item.cost),
-        [`sitePerks.${siteKey}.${item.perkField}`]: increment(item.amount),
+        [`sitePerks.${siteKey}.${item.perkField}`]: perkValue,
         [`redemptionCounts.${item.id}`]: increment(1),
       });
     });
