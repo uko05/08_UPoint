@@ -30,6 +30,7 @@ const SITE_GROUPS = [
   {
     siteKey: 'friendBoard',
     siteNameKey: 'siteFriendBoard',
+    headerBg: '#fff8e1', // FriendBoardのテーマカラー(#ffcc00)のうっすら版
     items: [
       {
         id: 'friendboard_chat_plus5',
@@ -162,6 +163,19 @@ function buildItemCard(item, siteKey) {
   desc.className = 'item-desc';
   desc.textContent = t[item.descKey];
   info.appendChild(desc);
+  card.appendChild(info);
+
+  const action = document.createElement('div');
+  action.className = 'item-action';
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'item-redeem-btn';
+  btn.textContent = t.redeemBtn;
+  btn.disabled = latestUkoPoints < item.cost || limitReached;
+  btn.addEventListener('click', () => handleRedeem(item, siteKey));
+  action.appendChild(btn);
+
   const limit = document.createElement('p');
   limit.className = 'item-limit';
   if (item.maxRedemptions == null) {
@@ -171,16 +185,9 @@ function buildItemCard(item, siteKey) {
   } else {
     limit.textContent = t.limitRemaining(item.maxRedemptions, item.maxRedemptions - redeemedCount);
   }
-  info.appendChild(limit);
-  card.appendChild(info);
+  action.appendChild(limit);
 
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'item-redeem-btn';
-  btn.textContent = t.redeemBtn;
-  btn.disabled = latestUkoPoints < item.cost || limitReached;
-  btn.addEventListener('click', () => handleRedeem(item, siteKey));
-  card.appendChild(btn);
+  card.appendChild(action);
 
   return card;
 }
@@ -203,6 +210,7 @@ function renderSiteGroups() {
     const summary = document.createElement('summary');
     summary.className = 'site-group-header';
     summary.textContent = t[group.siteNameKey];
+    if (group.headerBg) summary.style.background = group.headerBg;
     details.appendChild(summary);
 
     const itemsDiv = document.createElement('div');

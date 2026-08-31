@@ -194,14 +194,21 @@ main {
   line-height: 1.4;
 }
 
+.item-action {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
 .item-limit {
-  margin-top: 6px;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--muted);
+  text-align: center;
 }
 
 .item-redeem-btn {
-  flex-shrink: 0;
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: bold;
