@@ -1,0 +1,194 @@
+:root {
+  --bg:      #f4f4f9;
+  --surface: #ffffff;
+  --surface2:#eeeeee;
+  --accent:  #ffcc00;
+  --text:    #333333;
+  --muted:   #888888;
+  --border:  #dddddd;
+  --gold:    #aa8800;
+  --font:    'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.site-version {
+  position: fixed;
+  right: 8px;
+  bottom: 6px;
+  font-size: 11px;
+  color: rgba(0,0,0,0.2);
+  pointer-events: none;
+  z-index: 1;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 40px;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  padding: 40px 16px 16px;
+  text-align: center;
+}
+
+.header-topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 4px;
+}
+
+.lang-switch {
+  display: flex;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+.lang-switch label { display: flex; align-items: center; gap: 3px; cursor: pointer; }
+
+header h1 {
+  margin-top: 8px;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.header-sub {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+main {
+  flex: 1;
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+.balance-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.balance-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.balance-value {
+  margin-top: 4px;
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: var(--gold);
+}
+
+.balance-unit {
+  font-size: 1.1rem;
+  margin-left: 3px;
+  color: var(--muted);
+}
+
+.balance-hint {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.items-section h2 {
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.item-title {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.item-desc {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.item-foot {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-cost {
+  font-weight: bold;
+  color: var(--gold);
+  font-size: 0.95rem;
+}
+
+.item-redeem-btn {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: bold;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: none;
+  background: var(--accent);
+  color: #4a3600;
+  cursor: pointer;
+}
+.item-redeem-btn:disabled {
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: default;
+}
+
+.twitter-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.sad_label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  max-width: 90%;
+  background: rgba(0,0,0,0.82);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  z-index: 2000;
+  text-align: center;
+}
+.toast.toast-error { background: rgba(180,30,30,0.9); }

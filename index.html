@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="うーこの部屋の各サイトで貯めたうーこポイント(UP)を、色々なサイトのちょっとした特典と交換できるポイント交換所です。">
+
+    <title>うーこポイント交換所 - うーこの部屋</title>
+    <link rel="stylesheet" href="style.css?v=1.0">
+
+    <!-- Favicon -->
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/00_common/favicon_io/favicon.ico" type="image/x-icon">
+    <link rel="icon" sizes="16x16" href="https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/00_common/favicon_io/favicon-16x16.png">
+    <link rel="icon" sizes="32x32" href="https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/00_common/favicon_io/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/00_common/favicon_io/apple-touch-icon.png">
+    <link rel="icon" sizes="192x192" href="https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/00_common/favicon_io/android-chrome-192x192.png">
+    <link rel="icon" sizes="512x512" href="https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/00_common/favicon_io/android-chrome-512x512.png">
+</head>
+<body>
+    <header>
+        <div class="header-topbar">
+            <div class="lang-switch">
+                <label><input type="radio" name="lang" value="ja" checked> JP</label>
+                <label><input type="radio" name="lang" value="en"> EN</label>
+            </div>
+        </div>
+        <h1 data-i18n="pageTitle">うーこポイント交換所</h1>
+        <p class="header-sub" data-i18n="headerSub">貯まったうーこポイント(UP)で、色々なサイトのちょっとした特典と交換できます</p>
+    </header>
+
+    <main>
+        <section class="balance-section">
+            <p class="balance-label" data-i18n="balanceLabel">現在の所持UP</p>
+            <p class="balance-value"><span id="balance-count">0</span><span class="balance-unit">UP</span></p>
+            <p class="balance-hint" data-i18n="balanceHint">UPは原神おみくじの「アゲいいね！」「モラいいね！」で貯まります</p>
+        </section>
+
+        <section class="items-section">
+            <h2 data-i18n="itemsTitle">交換できる特典</h2>
+            <div class="item-list" id="item-list"></div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast" style="display:none;"></div>
+
+    <a href="https://x.com/uko_dayo_" target="_blank" rel="noopener">
+        <img src="https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/00_common/footer_icon/twitter_image.png" alt="Twitter" class="twitter-icon">
+    </a>
+    <a href="https://t.co/0jAcAV2GJv" target="_blank" rel="noopener">
+        <img src="https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/00_common/footer_icon/discord_image.png" alt="Discord" class="twitter-icon">
+    </a>
+    <span class="sad_label">＜友達ください…</span>
+    <span id="uko-account-status-slot"></span>
+
+    <span id="site-version" class="site-version">v1.0</span>
+
+    <script type="module" src="script.js"></script>
+    <script src="https://uko05.github.io/TopPage00/shared/sidebar.js"></script>
+    <script type="module" src="https://uko05.github.io/24_AccountCenter/account-status.js"></script>
+</body>
+</html>
