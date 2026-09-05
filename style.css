@@ -224,6 +224,16 @@ main {
   color: var(--muted);
   cursor: default;
 }
+/* 交換済み(上限到達): 中立なグレーのまま「済み」だと分かる表示 */
+.item-redeem-btn-done:disabled {
+  background: var(--surface2);
+  color: var(--muted);
+}
+/* ポイント不足: 交換済みと見分けがつくよう、はっきり違う色にする */
+.item-redeem-btn-insufficient:disabled {
+  background: #fdecea;
+  color: #c0392b;
+}
 
 .site-footer {
   text-align: center;

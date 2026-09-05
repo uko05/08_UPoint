@@ -108,6 +108,7 @@ const i18n = {
     itemsTitle: '交換できる特典',
     costLabel: (n) => `${n}UP`,
     redeemBtn: '交換する',
+    redeemedBtn: '交換済み',
     redeemConfirm: (title, cost) => `「${title}」と${cost}UPを交換しますか？`,
     redeemSuccess: (title) => `「${title}」と交換しました！`,
     redeemInsufficientPoints: 'UPが足りません。',
@@ -139,6 +140,7 @@ const i18n = {
     itemsTitle: 'Available Perks',
     costLabel: (n) => `${n}UP`,
     redeemBtn: 'Redeem',
+    redeemedBtn: 'Redeemed',
     redeemConfirm: (title, cost) => `Redeem "${title}" for ${cost}UP?`,
     redeemSuccess: (title) => `Redeemed "${title}"!`,
     redeemInsufficientPoints: 'Not enough UP.',
@@ -241,7 +243,9 @@ function buildItemCard(item, siteKey) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'item-redeem-btn';
-  btn.textContent = t.redeemBtn;
+  btn.classList.toggle('item-redeem-btn-done', limitReached);
+  btn.classList.toggle('item-redeem-btn-insufficient', !limitReached && latestUkoPoints < item.cost);
+  btn.textContent = limitReached ? t.redeemedBtn : t.redeemBtn;
   btn.disabled = latestUkoPoints < item.cost || limitReached;
   btn.addEventListener('click', () => handleRedeem(item, siteKey));
   action.appendChild(btn);
