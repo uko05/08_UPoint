@@ -157,7 +157,7 @@ main {
 
 .item-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   border: 1px solid var(--border);
   border-radius: 12px;
