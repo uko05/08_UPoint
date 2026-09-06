@@ -234,6 +234,12 @@ main {
   background: #fdecea;
   color: #c0392b;
 }
+/* 条件未達成(例: 実績コンプ限定アイテム): ポイント不足ともお金の話ではないので、
+   さらに別の色(紫系)にして「お金じゃなく条件の話」だと分かるようにする */
+.item-redeem-btn-locked:disabled {
+  background: #f1e6fb;
+  color: #6a3d9a;
+}
 
 .site-footer {
   text-align: center;
