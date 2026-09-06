@@ -194,18 +194,24 @@ main {
   line-height: 1.4;
 }
 
+/* 実績コンプリート等、交換条件付きアイテムの条件文(達成状況込み) */
+.item-condition {
+  color: #a15c00;
+  font-weight: bold;
+}
+
 .item-action {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   gap: 4px;
 }
 
 .item-limit {
   font-size: 0.68rem;
   color: var(--muted);
-  text-align: center;
+  text-align: right;
 }
 
 .item-redeem-btn {
@@ -229,16 +235,11 @@ main {
   background: var(--surface2);
   color: var(--muted);
 }
-/* ポイント不足: 交換済みと見分けがつくよう、はっきり違う色にする */
+/* ポイント不足 or 交換条件未達成: どちらも「まだ交換できない」という意味で同じ扱いにし、
+   交換済み(グレー)と見分けがつくよう、はっきり違う色にする */
 .item-redeem-btn-insufficient:disabled {
   background: #fdecea;
   color: #c0392b;
-}
-/* 条件未達成(例: 実績コンプ限定アイテム): ポイント不足ともお金の話ではないので、
-   さらに別の色(紫系)にして「お金じゃなく条件の話」だと分かるようにする */
-.item-redeem-btn-locked:disabled {
-  background: #f1e6fb;
-  color: #6a3d9a;
 }
 
 .site-footer {

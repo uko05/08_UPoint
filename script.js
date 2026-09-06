@@ -76,17 +76,6 @@ const SITE_GROUPS = [
         titleKey: 'itemAccountTitleUpChampionTitle',
         descKey: 'itemAccountTitleUpChampionDesc',
       },
-      {
-        id: 'accountcenter_title_fate_observer',
-        perkField: 'titleFateObserverUnlocked',
-        perkType: 'flag',
-        cost: 100,
-        maxRedemptions: 1,
-        // 原神おみくじの実績を全部達成していないと交換できない特別枠
-        requiresAllOmikujiAchievements: true,
-        titleKey: 'itemAccountTitleFateObserverTitle',
-        descKey: 'itemAccountTitleFateObserverDesc',
-      },
     ],
   },
   {
@@ -102,6 +91,17 @@ const SITE_GROUPS = [
         maxRedemptions: 1,
         titleKey: 'itemOmikujiAchDisplayTitle',
         descKey: 'itemOmikujiAchDisplayDesc',
+      },
+      {
+        id: 'omikuji_title_fate_observer',
+        perkField: 'titleFateObserverUnlocked',
+        perkType: 'flag',
+        cost: 100,
+        maxRedemptions: 1,
+        // 原神おみくじの実績を全部達成していないと交換できない特別枠
+        requiresAllOmikujiAchievements: true,
+        titleKey: 'itemOmikujiTitleFateObserverTitle',
+        descKey: 'itemOmikujiTitleFateObserverDesc',
       },
     ],
   },
@@ -142,11 +142,11 @@ const i18n = {
     itemAccountTitleRegularDesc: 'ゴールドレアリティの称号「うーこの部屋常連」を購入します。アカウント管理でいつでも設定できます。',
     itemAccountTitleUpChampionTitle: 'レジェンド称号「UP覇者」',
     itemAccountTitleUpChampionDesc: 'レジェンドレアリティの称号「UP覇者」を購入します。アカウント管理でいつでも設定できます。',
-    itemAccountTitleFateObserverTitle: 'レジェンド称号「運命の観測者」',
-    itemAccountTitleFateObserverDesc: '原神おみくじの実績を全部達成すると購入できる、レジェンドレアリティの称号「運命の観測者」です。アカウント管理でいつでも設定できます。',
     siteOmikuji: '原神おみくじ',
     itemOmikujiAchDisplayTitle: 'アチーブメント表示を解放',
     itemOmikujiAchDisplayDesc: 'アカウント管理で設定した称号が、おみくじの「みんなの結果」であなたの名前の横に表示されるようになります。',
+    itemOmikujiTitleFateObserverTitle: 'レジェンド称号「運命の観測者」',
+    itemOmikujiTitleFateObserverDesc: '原神おみくじの実績を全部達成すると購入できる、レジェンドレアリティの称号「運命の観測者」です。アカウント管理でいつでも設定できます。',
   },
   en: {
     pageTitle: 'Uko Point Exchange',
@@ -178,11 +178,11 @@ const i18n = {
     itemAccountTitleRegularDesc: 'Purchase the gold-rarity title "Room Regular" (うーこの部屋常連). Equip it anytime from Account Center.',
     itemAccountTitleUpChampionTitle: 'Legend Title: "UP Champion"',
     itemAccountTitleUpChampionDesc: 'Purchase the legend-rarity title "UP Champion" (UP覇者). Equip it anytime from Account Center.',
-    itemAccountTitleFateObserverTitle: 'Legend Title: "Fate Observer"',
-    itemAccountTitleFateObserverDesc: 'A legend-rarity title, "Fate Observer" (運命の観測者), purchasable once you\'ve completed every Genshin Omikuji achievement. Equip it anytime from Account Center.',
     siteOmikuji: 'Genshin Omikuji',
     itemOmikujiAchDisplayTitle: 'Unlock Achievement Display',
     itemOmikujiAchDisplayDesc: "Shows the title you set on Account Center next to your name on Omikuji's \"Everyone's Results\" feed.",
+    itemOmikujiTitleFateObserverTitle: 'Legend Title: "Fate Observer"',
+    itemOmikujiTitleFateObserverDesc: 'A legend-rarity title, "Fate Observer" (運命の観測者), purchasable once you\'ve completed every Genshin Omikuji achievement. Equip it anytime from Account Center.',
   },
 };
 function currentLang() {
@@ -263,6 +263,13 @@ function buildItemCard(item, siteKey) {
   desc.className = 'item-desc';
   desc.textContent = t[item.descKey];
   info.appendChild(desc);
+  if (item.requiresAllOmikujiAchievements) {
+    const have = OMIKUJI_ACHIEVEMENTS.filter((a) => latestOmikujiAchievements.includes(a.id)).length;
+    const condition = document.createElement('p');
+    condition.className = 'item-desc item-condition';
+    condition.textContent = t.conditionOmikujiAllAch(have, OMIKUJI_ACHIEVEMENTS.length);
+    info.appendChild(condition);
+  }
   card.appendChild(info);
 
   const action = document.createElement('div');
@@ -272,8 +279,7 @@ function buildItemCard(item, siteKey) {
   btn.type = 'button';
   btn.className = 'item-redeem-btn';
   btn.classList.toggle('item-redeem-btn-done', limitReached);
-  btn.classList.toggle('item-redeem-btn-locked', !limitReached && !requirementMet);
-  btn.classList.toggle('item-redeem-btn-insufficient', !limitReached && requirementMet && latestUkoPoints < item.cost);
+  btn.classList.toggle('item-redeem-btn-insufficient', !limitReached && (!requirementMet || latestUkoPoints < item.cost));
   btn.textContent = limitReached ? t.redeemedBtn : t.redeemBtn;
   btn.disabled = latestUkoPoints < item.cost || limitReached || !requirementMet;
   btn.addEventListener('click', () => handleRedeem(item, siteKey));
@@ -283,9 +289,6 @@ function buildItemCard(item, siteKey) {
   limit.className = 'item-limit';
   if (limitReached) {
     limit.textContent = t.limitReached;
-  } else if (!requirementMet && item.requiresAllOmikujiAchievements) {
-    const have = OMIKUJI_ACHIEVEMENTS.filter((a) => latestOmikujiAchievements.includes(a.id)).length;
-    limit.textContent = t.conditionOmikujiAllAch(have, OMIKUJI_ACHIEVEMENTS.length);
   } else if (item.maxRedemptions == null) {
     limit.textContent = t.limitNone;
   } else {
