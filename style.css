@@ -211,7 +211,7 @@ main {
 .item-limit {
   font-size: 0.68rem;
   color: var(--muted);
-  text-align: right;
+  text-align: center;
   white-space: pre-line;
 }
 
