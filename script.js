@@ -79,6 +79,22 @@ const SITE_GROUPS = [
     ],
   },
   {
+    siteKey: 'storage17',
+    siteNameKey: 'siteStorage',
+    headerBg: '#e8f5e9', // うっすら緑
+    items: [
+      {
+        id: 'storage17_original_upload',
+        perkField: 'originalUpload',
+        perkType: 'flag',
+        cost: 100,
+        maxRedemptions: 1,
+        titleKey: 'itemStorageOriginalUploadTitle',
+        descKey: 'itemStorageOriginalUploadDesc',
+      },
+    ],
+  },
+  {
     siteKey: 'omikuji',
     siteNameKey: 'siteOmikuji',
     headerBg: '#fff3e0', // うっすら橙
@@ -142,6 +158,9 @@ const i18n = {
     itemAccountTitleRegularDesc: 'ゴールドレアリティの称号「うーこの部屋常連」を購入します。アカウント管理でいつでも設定できます。',
     itemAccountTitleUpChampionTitle: 'レジェンド称号「UP覇者」',
     itemAccountTitleUpChampionDesc: 'レジェンドレアリティの称号「UP覇者」を購入します。アカウント管理でいつでも設定できます。',
+    siteStorage: '画像保管庫',
+    itemStorageOriginalUploadTitle: '元の画像のまま保存',
+    itemStorageOriginalUploadDesc: '画像保管庫で、圧縮せず元の画質のまま画像を保存できるようになります(一度交換すればずっと使えます。ただし1日5枚までの上限があります)。',
     siteOmikuji: '原神おみくじ',
     itemOmikujiAchDisplayTitle: 'アチーブメント表示を解放',
     itemOmikujiAchDisplayDesc: 'アカウント管理で設定した称号が、おみくじの「みんなの結果」であなたの名前の横に表示されるようになります。',
@@ -178,6 +197,9 @@ const i18n = {
     itemAccountTitleRegularDesc: 'Purchase the gold-rarity title "Room Regular" (うーこの部屋常連). Equip it anytime from Account Center.',
     itemAccountTitleUpChampionTitle: 'Legend Title: "UP Champion"',
     itemAccountTitleUpChampionDesc: 'Purchase the legend-rarity title "UP Champion" (UP覇者). Equip it anytime from Account Center.',
+    siteStorage: 'Image Storage',
+    itemStorageOriginalUploadTitle: 'Save originals uncompressed',
+    itemStorageOriginalUploadDesc: "Lets you save images to Image Storage at full original quality instead of compressed (a one-time purchase that lasts forever, but capped at 5 originals per day).",
     siteOmikuji: 'Genshin Omikuji',
     itemOmikujiAchDisplayTitle: 'Unlock Achievement Display',
     itemOmikujiAchDisplayDesc: "Shows the title you set on Account Center next to your name on Omikuji's \"Everyone's Results\" feed.",
