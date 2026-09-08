@@ -322,7 +322,7 @@ const i18n = {
     missionUnlimitedLabel: '無制限',
     missionAchievedCount: (n) => `達成回数：${n}回`,
     missionDoneLabel: '達成済み',
-    missionNotDoneLabel: '未達成',
+    missionOneTimeLabel: '1回限り',
     missionGoToSiteBtn: '移動する',
     missionClaimBtn: '受け取る',
     missionClaimSuccess: (n) => `+${n}UPを受け取りました！`,
@@ -368,29 +368,29 @@ const i18n = {
     missionOmikujiLikeReceivedTitle: '自分の結果にいいねをされる',
     missionOmikujiLikeReceivedDesc: '自分が占った結果に、他の人から「いいね」をもらいます。',
     siteGenshinRanking: '原神推しキャラランキング',
-    missionGenshinRankingImageTitle: '画像を1回生成する（アカウント登録者限定）',
-    missionGenshinRankingImageDesc: '原神推しキャラランキングでランキング画像を1回作成すると、初回だけもらえます。アカウント登録（無料）が必要です。',
+    missionGenshinRankingImageTitle: '画像を1回生成する',
+    missionGenshinRankingImageDesc: 'アカウントログインした状態で画像を生成する。',
     siteStarrailRankingPath: 'スタレ推しキャラランキング【運命】',
-    missionStarrailRankingPathImageTitle: '画像を1回生成する（アカウント登録者限定）',
-    missionStarrailRankingPathImageDesc: 'スタレ推しキャラランキング【運命】でランキング画像を1回作成すると、初回だけもらえます。アカウント登録（無料）が必要です。',
+    missionStarrailRankingPathImageTitle: '画像を1回生成する',
+    missionStarrailRankingPathImageDesc: 'アカウントログインした状態で画像を生成する。',
     siteStarrailRankingElement: 'スタレ推しキャラランキング【属性】',
-    missionStarrailRankingElementImageTitle: '画像を1回生成する（アカウント登録者限定）',
-    missionStarrailRankingElementImageDesc: 'スタレ推しキャラランキング【属性】でランキング画像を1回作成すると、初回だけもらえます。アカウント登録（無料）が必要です。',
+    missionStarrailRankingElementImageTitle: '画像を1回生成する',
+    missionStarrailRankingElementImageDesc: 'アカウントログインした状態で画像を生成する。',
     siteGenshinFreeFormat: '原神フリーフォーマット',
-    missionGenshinFreeFormatImageTitle: '画像を1回生成する（アカウント登録者限定）',
-    missionGenshinFreeFormatImageDesc: '原神フリーフォーマットで画像を1回作成すると、初回だけもらえます。アカウント登録（無料）が必要です。',
+    missionGenshinFreeFormatImageTitle: '画像を1回生成する',
+    missionGenshinFreeFormatImageDesc: 'アカウントログインした状態で画像を生成する。',
     siteStarrailFreeFormat: 'スタレフリーフォーマット',
-    missionStarrailFreeFormatImageTitle: '画像を1回生成する（アカウント登録者限定）',
-    missionStarrailFreeFormatImageDesc: 'スタレフリーフォーマットで画像を1回作成すると、初回だけもらえます。アカウント登録（無料）が必要です。',
+    missionStarrailFreeFormatImageTitle: '画像を1回生成する',
+    missionStarrailFreeFormatImageDesc: 'アカウントログインした状態で画像を生成する。',
     siteGenshinCheck: '原神チェックシート',
-    missionGenshinCheckImageTitle: '画像を1回生成する（アカウント登録者限定）',
-    missionGenshinCheckImageDesc: '原神チェックシートで画像を1回作成すると、初回だけもらえます。アカウント登録（無料）が必要です。',
+    missionGenshinCheckImageTitle: '画像を1回生成する',
+    missionGenshinCheckImageDesc: 'アカウントログインした状態で画像を生成する。',
     siteStarrailCheck: 'スタレチェックシート',
-    missionStarrailCheckImageTitle: '画像を1回生成する（アカウント登録者限定）',
-    missionStarrailCheckImageDesc: 'スタレチェックシートで画像を1回作成すると、初回だけもらえます。アカウント登録（無料）が必要です。',
+    missionStarrailCheckImageTitle: '画像を1回生成する',
+    missionStarrailCheckImageDesc: 'アカウントログインした状態で画像を生成する。',
     sitePlayMaker: '原神・スタレ画面メーカー',
-    missionPlayMakerImageTitle: '画像を1回生成する（アカウント登録者限定）',
-    missionPlayMakerImageDesc: '原神・スタレ画面メーカーで(原神/スタレ/魔女会いずれかの)画像を1回作成すると、初回だけもらえます。アカウント登録（無料）が必要です。',
+    missionPlayMakerImageTitle: '画像を1回生成する',
+    missionPlayMakerImageDesc: 'アカウントログインした状態で画像を生成する。',
   },
   en: {
     pageTitle: 'Uko Point Exchange',
@@ -405,7 +405,7 @@ const i18n = {
     missionUnlimitedLabel: 'Unlimited',
     missionAchievedCount: (n) => `Completed ${n} times`,
     missionDoneLabel: 'Done',
-    missionNotDoneLabel: 'Not done yet',
+    missionOneTimeLabel: 'One-time',
     missionGoToSiteBtn: 'Go',
     missionClaimBtn: 'Claim',
     missionClaimSuccess: (n) => `Claimed +${n}UP!`,
@@ -451,29 +451,29 @@ const i18n = {
     missionOmikujiLikeReceivedTitle: 'Get your result liked',
     missionOmikujiLikeReceivedDesc: 'Have someone else "like" your own fortune result.',
     siteGenshinRanking: 'Genshin Oshi Character Ranking',
-    missionGenshinRankingImageTitle: 'Generate an image once (registered accounts only)',
-    missionGenshinRankingImageDesc: 'Create a ranking image once on Genshin Oshi Character Ranking. One-time reward. Requires a free account.',
+    missionGenshinRankingImageTitle: 'Generate an image once',
+    missionGenshinRankingImageDesc: 'Generate an image while logged into your account.',
     siteStarrailRankingPath: 'Honkai: Star Rail Oshi Character Ranking【Path】',
-    missionStarrailRankingPathImageTitle: 'Generate an image once (registered accounts only)',
-    missionStarrailRankingPathImageDesc: 'Create a ranking image once on Star Rail Oshi Character Ranking【Path】. One-time reward. Requires a free account.',
+    missionStarrailRankingPathImageTitle: 'Generate an image once',
+    missionStarrailRankingPathImageDesc: 'Generate an image while logged into your account.',
     siteStarrailRankingElement: 'Honkai: Star Rail Oshi Character Ranking【Element】',
-    missionStarrailRankingElementImageTitle: 'Generate an image once (registered accounts only)',
-    missionStarrailRankingElementImageDesc: 'Create a ranking image once on Star Rail Oshi Character Ranking【Element】. One-time reward. Requires a free account.',
+    missionStarrailRankingElementImageTitle: 'Generate an image once',
+    missionStarrailRankingElementImageDesc: 'Generate an image while logged into your account.',
     siteGenshinFreeFormat: 'Genshin Free Format',
-    missionGenshinFreeFormatImageTitle: 'Generate an image once (registered accounts only)',
-    missionGenshinFreeFormatImageDesc: 'Create an image once on Genshin Free Format. One-time reward. Requires a free account.',
+    missionGenshinFreeFormatImageTitle: 'Generate an image once',
+    missionGenshinFreeFormatImageDesc: 'Generate an image while logged into your account.',
     siteStarrailFreeFormat: 'Star Rail Free Format',
-    missionStarrailFreeFormatImageTitle: 'Generate an image once (registered accounts only)',
-    missionStarrailFreeFormatImageDesc: 'Create an image once on Star Rail Free Format. One-time reward. Requires a free account.',
+    missionStarrailFreeFormatImageTitle: 'Generate an image once',
+    missionStarrailFreeFormatImageDesc: 'Generate an image while logged into your account.',
     siteGenshinCheck: 'Genshin Check Sheet',
-    missionGenshinCheckImageTitle: 'Generate an image once (registered accounts only)',
-    missionGenshinCheckImageDesc: 'Create an image once on Genshin Check Sheet. One-time reward. Requires a free account.',
+    missionGenshinCheckImageTitle: 'Generate an image once',
+    missionGenshinCheckImageDesc: 'Generate an image while logged into your account.',
     siteStarrailCheck: 'Star Rail Check Sheet',
-    missionStarrailCheckImageTitle: 'Generate an image once (registered accounts only)',
-    missionStarrailCheckImageDesc: 'Create an image once on Star Rail Check Sheet. One-time reward. Requires a free account.',
+    missionStarrailCheckImageTitle: 'Generate an image once',
+    missionStarrailCheckImageDesc: 'Generate an image while logged into your account.',
     sitePlayMaker: 'Genshin/Star Rail Screen Maker',
-    missionPlayMakerImageTitle: 'Generate an image once (registered accounts only)',
-    missionPlayMakerImageDesc: 'Create an image once (Genshin, Star Rail, or Majokai) on the Screen Maker. One-time reward. Requires a free account.',
+    missionPlayMakerImageTitle: 'Generate an image once',
+    missionPlayMakerImageDesc: 'Generate an image while logged into your account.',
   },
 };
 function currentLang() {
@@ -670,7 +670,7 @@ function buildMissionCard(mission, siteUrl) {
   const gotoBtn = () => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'item-mission-goto-btn';
+    btn.className = 'item-mission-btn item-mission-btn-goto';
     btn.textContent = t.missionGoToSiteBtn;
     btn.addEventListener('click', () => window.open(siteUrl, '_blank', 'noopener'));
     return btn;
@@ -686,14 +686,16 @@ function buildMissionCard(mission, siteUrl) {
     const claimed = !!latestMissionsClaimed[mission.claimKey];
     const achieved = !!latestMissionsAchieved[mission.claimKey];
     if (claimed) {
-      const status = document.createElement('p');
-      status.className = 'item-mission-status item-mission-status-done';
-      status.textContent = t.missionDoneLabel;
-      action.appendChild(status);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'item-mission-btn item-mission-btn-done';
+      btn.textContent = t.missionDoneLabel;
+      btn.disabled = true;
+      action.appendChild(btn);
     } else if (achieved) {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'item-mission-claim-btn';
+      btn.className = 'item-mission-btn item-mission-btn-claim';
       btn.textContent = t.missionClaimBtn;
       btn.addEventListener('click', () => handleMissionClaim(mission));
       action.appendChild(btn);
@@ -701,7 +703,7 @@ function buildMissionCard(mission, siteUrl) {
       action.appendChild(gotoBtn());
       const status = document.createElement('p');
       status.className = 'item-mission-status';
-      status.textContent = t.missionNotDoneLabel;
+      status.textContent = t.missionOneTimeLabel;
       action.appendChild(status);
     }
   }
