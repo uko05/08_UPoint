@@ -145,6 +145,54 @@ const SITE_GROUPS = [
 // サイト枠の開閉状態(再描画のたびに<details>を作り直すため、ここで覚えておく)
 const openGroups = new Set(SITE_GROUPS.map((g) => g.siteKey));
 
+// ===== UPを貯める方法一覧(データ駆動。SITE_GROUPSと同じくサイトごとにグループ化) =====
+// statKey: unlimited(無制限)ミッションの「これまでの達成回数」をomikujiUsersの
+//          該当フィールドからそのまま表示する(UPointが直接付与するわけではなく、
+//          各サイト側で既に加算されている値を表示するだけ)。
+// claimKey: 1回限りミッションの達成判定に使う。omikujiUsers.missionsClaimed.{claimKey}
+//           が各サイト側から立てられる想定。
+const MISSION_GROUPS = [
+  {
+    siteKey: 'omikuji',
+    siteNameKey: 'siteOmikuji',
+    headerBg: '#fff3e0',
+    missions: [
+      {
+        id: 'omikuji_like_given',
+        reward: 1,
+        unlimited: true,
+        statKey: 'totalLikesGiven',
+        titleKey: 'missionOmikujiLikeGivenTitle',
+        descKey: 'missionOmikujiLikeGivenDesc',
+      },
+      {
+        id: 'omikuji_like_received',
+        reward: 2,
+        unlimited: true,
+        statKey: 'totalLikesReceived',
+        titleKey: 'missionOmikujiLikeReceivedTitle',
+        descKey: 'missionOmikujiLikeReceivedDesc',
+      },
+    ],
+  },
+  {
+    siteKey: 'genshinRanking',
+    siteNameKey: 'siteGenshinRanking',
+    headerBg: '#e3f2fd',
+    missions: [
+      {
+        id: 'genshinRankingImage',
+        reward: 20,
+        unlimited: false,
+        claimKey: 'genshinRankingImage',
+        titleKey: 'missionGenshinRankingImageTitle',
+        descKey: 'missionGenshinRankingImageDesc',
+      },
+    ],
+  },
+];
+const missionOpenGroups = new Set(MISSION_GROUPS.map((g) => g.siteKey));
+
 // ===== i18n =====
 const i18n = {
   ja: {
@@ -153,6 +201,14 @@ const i18n = {
     balanceLabel: '現在の所持UP',
     balanceHint: 'UPは様々なサイトのミッションをクリアすると貯まります',
     itemsTitle: '交換できる特典',
+    tabExchange: '交換',
+    tabMissions: 'ミッション',
+    missionsTitle: 'UPを貯める方法',
+    missionRewardLabel: (n) => `+${n}UP`,
+    missionUnlimitedLabel: '無制限',
+    missionAchievedCount: (n) => `達成回数：${n}回`,
+    missionDoneLabel: '達成済み',
+    missionNotDoneLabel: '未達成',
     costLabel: (n) => `${n}UP`,
     redeemBtn: '交換する',
     redeemedBtn: '交換済み',
@@ -189,6 +245,13 @@ const i18n = {
     itemOmikujiGachaTicketDesc: '原神おみくじの裏面デザインガチャを1回引けるガチャ券と交換します(何回でも交換できます)。',
     itemOmikujiTitleFateObserverTitle: 'レジェンド称号「運命の観測者」',
     itemOmikujiTitleFateObserverDesc: '原神おみくじの実績を全部達成すると購入できる、レジェンドレアリティの称号「運命の観測者」です。アカウント管理でいつでも設定できます。',
+    missionOmikujiLikeGivenTitle: '他人の結果にいいねをする',
+    missionOmikujiLikeGivenDesc: '原神おみくじの「みんなの結果」で、他の人の占い結果に「いいね」を押します。',
+    missionOmikujiLikeReceivedTitle: '自分の結果にいいねをされる',
+    missionOmikujiLikeReceivedDesc: '自分が占った結果に、他の人から「いいね」をもらいます。',
+    siteGenshinRanking: '原神推しキャラランキング',
+    missionGenshinRankingImageTitle: '画像を1回生成する（アカウント登録者限定）',
+    missionGenshinRankingImageDesc: '原神推しキャラランキングでランキング画像を1回作成すると、初回だけもらえます。アカウント登録（無料）が必要です。',
   },
   en: {
     pageTitle: 'Uko Point Exchange',
@@ -196,6 +259,14 @@ const i18n = {
     balanceLabel: 'Your current UP',
     balanceHint: 'Earn UP by completing missions across various sites',
     itemsTitle: 'Available Perks',
+    tabExchange: 'Exchange',
+    tabMissions: 'Missions',
+    missionsTitle: 'Ways to Earn UP',
+    missionRewardLabel: (n) => `+${n}UP`,
+    missionUnlimitedLabel: 'Unlimited',
+    missionAchievedCount: (n) => `Completed ${n} times`,
+    missionDoneLabel: 'Done',
+    missionNotDoneLabel: 'Not done yet',
     costLabel: (n) => `${n}UP`,
     redeemBtn: 'Redeem',
     redeemedBtn: 'Redeemed',
@@ -232,6 +303,13 @@ const i18n = {
     itemOmikujiGachaTicketDesc: 'Exchange for one gacha ticket to draw the Genshin Omikuji card-back gacha once (redeemable any number of times).',
     itemOmikujiTitleFateObserverTitle: 'Legend Title: "Fate Observer"',
     itemOmikujiTitleFateObserverDesc: 'A legend-rarity title, "Fate Observer" (運命の観測者), purchasable once you\'ve completed every Genshin Omikuji achievement. Equip it anytime from Account Center.',
+    missionOmikujiLikeGivenTitle: 'Like someone else\'s result',
+    missionOmikujiLikeGivenDesc: 'On Genshin Omikuji\'s "Everyone\'s Results", tap "like" on another person\'s fortune.',
+    missionOmikujiLikeReceivedTitle: 'Get your result liked',
+    missionOmikujiLikeReceivedDesc: 'Have someone else "like" your own fortune result.',
+    siteGenshinRanking: 'Genshin Oshi Character Ranking',
+    missionGenshinRankingImageTitle: 'Generate an image once (registered accounts only)',
+    missionGenshinRankingImageDesc: 'Create a ranking image once on Genshin Oshi Character Ranking. One-time reward. Requires a free account.',
   },
 };
 function currentLang() {
@@ -248,6 +326,7 @@ function applyLang(lang) {
   });
   localStorage.setItem('lang', lang);
   renderSiteGroups();
+  renderMissionGroups();
 }
 
 function initLangSwitch() {
@@ -264,6 +343,8 @@ function initLangSwitch() {
 let latestUkoPoints = 0;
 let latestRedemptionCounts = {};
 let latestOmikujiAchievements = [];
+let latestMissionStats = {};
+let latestMissionsClaimed = {};
 
 function hasAllOmikujiAchievements() {
   return OMIKUJI_ACHIEVEMENTS.every((a) => latestOmikujiAchievements.includes(a.id));
@@ -276,8 +357,14 @@ function startBalanceListener() {
     latestUkoPoints = data.ukoPoints || 0;
     latestRedemptionCounts = data.redemptionCounts || {};
     latestOmikujiAchievements = data.achievements || [];
+    latestMissionStats = {
+      totalLikesGiven: data.totalLikesGiven || 0,
+      totalLikesReceived: data.totalLikesReceived || 0,
+    };
+    latestMissionsClaimed = data.missionsClaimed || {};
     if (el) el.textContent = latestUkoPoints;
     renderSiteGroups();
+    renderMissionGroups();
   }, (e) => console.error('[upoint] balance listen failed', e));
 }
 
@@ -380,6 +467,93 @@ function renderSiteGroups() {
   });
 }
 
+// ===== ミッション一覧の描画(交換所グループと同じ見た目) =====
+function buildMissionCard(mission) {
+  const t = s();
+  const card = document.createElement('div');
+  card.className = 'item-card';
+
+  const reward = document.createElement('span');
+  reward.className = 'item-reward';
+  const rewardNum = document.createElement('span');
+  rewardNum.textContent = t.missionRewardLabel(mission.reward);
+  reward.appendChild(rewardNum);
+  card.appendChild(reward);
+
+  const info = document.createElement('div');
+  info.className = 'item-info';
+  const title = document.createElement('p');
+  title.className = 'item-title';
+  title.textContent = t[mission.titleKey];
+  info.appendChild(title);
+  const desc = document.createElement('p');
+  desc.className = 'item-desc';
+  desc.textContent = t[mission.descKey];
+  info.appendChild(desc);
+  card.appendChild(info);
+
+  const action = document.createElement('div');
+  action.className = 'item-action';
+
+  const status = document.createElement('p');
+  status.className = 'item-mission-status';
+  if (mission.unlimited) {
+    status.textContent = `${t.missionUnlimitedLabel}\n${t.missionAchievedCount(latestMissionStats[mission.statKey] || 0)}`;
+  } else {
+    const done = !!latestMissionsClaimed[mission.claimKey];
+    status.classList.toggle('item-mission-status-done', done);
+    status.textContent = done ? t.missionDoneLabel : t.missionNotDoneLabel;
+  }
+  action.appendChild(status);
+
+  card.appendChild(action);
+
+  return card;
+}
+
+function renderMissionGroups() {
+  const list = document.getElementById('mission-group-list');
+  if (!list) return;
+  const t = s();
+  list.innerHTML = '';
+
+  MISSION_GROUPS.forEach((group) => {
+    const details = document.createElement('details');
+    details.className = 'site-group';
+    details.open = missionOpenGroups.has(group.siteKey);
+    details.addEventListener('toggle', () => {
+      if (details.open) missionOpenGroups.add(group.siteKey);
+      else missionOpenGroups.delete(group.siteKey);
+    });
+
+    const summary = document.createElement('summary');
+    summary.className = 'site-group-header';
+    summary.textContent = t[group.siteNameKey];
+    if (group.headerBg) summary.style.background = group.headerBg;
+    details.appendChild(summary);
+
+    const itemsDiv = document.createElement('div');
+    itemsDiv.className = 'site-group-items';
+    group.missions.forEach((mission) => itemsDiv.appendChild(buildMissionCard(mission)));
+    details.appendChild(itemsDiv);
+
+    list.appendChild(details);
+  });
+}
+
+// ===== タブ切り替え =====
+function initTabs() {
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      buttons.forEach((b) => b.classList.toggle('active', b === btn));
+      document.getElementById('tab-panel-exchange').hidden = tab !== 'exchange';
+      document.getElementById('tab-panel-missions').hidden = tab !== 'missions';
+    });
+  });
+}
+
 async function handleRedeem(item, siteKey) {
   const t = s();
   const title = t[item.titleKey];
@@ -448,4 +622,5 @@ function showToast(text, isError) {
 
 // ===== 初期化 =====
 initLangSwitch();
+initTabs();
 startBalanceListener();
