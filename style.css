@@ -161,7 +161,7 @@ main {
   text-align: center;
   white-space: pre-line;
 }
-/* ミッション用ボタン共通(移動する/受け取る/達成済みを同じ形に揃える) */
+/* ミッション用ボタン共通(移動する/受け取るを同じ形に揃える) */
 .item-mission-btn {
   font-family: inherit;
   font-size: 0.85rem;
@@ -172,11 +172,11 @@ main {
   cursor: pointer;
 }
 .item-mission-btn-goto {
-  background: var(--surface2);
-  color: var(--text);
-  border-color: var(--border);
+  background: #4a90e2;
+  color: #ffffff;
+  border-color: #3a7bc8;
 }
-.item-mission-btn-goto:hover { background: #e2e2e2; }
+.item-mission-btn-goto:hover { background: #3a7bc8; }
 
 .item-mission-btn-claim {
   background: linear-gradient(180deg, #ffe066, #ff9800);
@@ -184,13 +184,6 @@ main {
   border-color: #e08600;
 }
 .item-mission-btn-claim:hover { filter: brightness(1.06); }
-
-.item-mission-btn-done {
-  background: var(--surface2);
-  color: var(--muted);
-  border-color: var(--border);
-  cursor: default;
-}
 
 .site-group-list {
   display: flex;

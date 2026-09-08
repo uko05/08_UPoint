@@ -321,7 +321,6 @@ const i18n = {
     missionRewardLabel: (n) => `+${n}UP`,
     missionUnlimitedLabel: '無制限',
     missionAchievedCount: (n) => `達成回数：${n}回`,
-    missionDoneLabel: '達成済み',
     missionOneTimeLabel: '1回限り',
     missionGoToSiteBtn: '移動する',
     missionClaimBtn: '受け取る',
@@ -404,7 +403,6 @@ const i18n = {
     missionRewardLabel: (n) => `+${n}UP`,
     missionUnlimitedLabel: 'Unlimited',
     missionAchievedCount: (n) => `Completed ${n} times`,
-    missionDoneLabel: 'Done',
     missionOneTimeLabel: 'One-time',
     missionGoToSiteBtn: 'Go',
     missionClaimBtn: 'Claim',
@@ -634,10 +632,10 @@ function renderSiteGroups() {
 }
 
 // ===== ミッション一覧の描画(交換所グループと同じ見た目)
-// 一度きりミッション(claimKeyあり)はソシャゲ方式の3段階:
+// 一度きりミッション(claimKeyあり)はソシャゲ方式の2段階:
 //   ①未達成 → 「移動する」ボタンでサイトへ移動
 //   ②条件達成済み(missionsAchieved) → 「受け取る」ボタンでUP受け取り(この時初めてukoPoints加算)
-//   ③受け取り済み(missionsClaimed) → 「達成済み」表示のみ
+// 受け取り済み(missionsClaimed)になったミッションは一覧から消える(renderMissionGroupsでフィルタ)。
 // 無制限ミッション(おみくじのいいね等)はその場でUPが付与される既存仕様のため、
 // 受け取るボタンは無く常に「移動する」+達成回数を表示する。 =====
 function buildMissionCard(mission, siteUrl) {
@@ -682,30 +680,19 @@ function buildMissionCard(mission, siteUrl) {
     status.className = 'item-mission-status';
     status.textContent = `${t.missionUnlimitedLabel}\n${t.missionAchievedCount(latestMissionStats[mission.statKey] || 0)}`;
     action.appendChild(status);
+  } else if (latestMissionsAchieved[mission.claimKey]) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'item-mission-btn item-mission-btn-claim';
+    btn.textContent = t.missionClaimBtn;
+    btn.addEventListener('click', () => handleMissionClaim(mission));
+    action.appendChild(btn);
   } else {
-    const claimed = !!latestMissionsClaimed[mission.claimKey];
-    const achieved = !!latestMissionsAchieved[mission.claimKey];
-    if (claimed) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'item-mission-btn item-mission-btn-done';
-      btn.textContent = t.missionDoneLabel;
-      btn.disabled = true;
-      action.appendChild(btn);
-    } else if (achieved) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'item-mission-btn item-mission-btn-claim';
-      btn.textContent = t.missionClaimBtn;
-      btn.addEventListener('click', () => handleMissionClaim(mission));
-      action.appendChild(btn);
-    } else {
-      action.appendChild(gotoBtn());
-      const status = document.createElement('p');
-      status.className = 'item-mission-status';
-      status.textContent = t.missionOneTimeLabel;
-      action.appendChild(status);
-    }
+    action.appendChild(gotoBtn());
+    const status = document.createElement('p');
+    status.className = 'item-mission-status';
+    status.textContent = t.missionOneTimeLabel;
+    action.appendChild(status);
   }
 
   card.appendChild(action);
@@ -720,6 +707,13 @@ function renderMissionGroups() {
   list.innerHTML = '';
 
   MISSION_GROUPS.forEach((group) => {
+    // 一度きりミッションは受け取り済みになったら一覧から消す。
+    // 全部受け取り済みならグループごと非表示にする。
+    const visibleMissions = group.missions.filter(
+      (m) => m.unlimited || !latestMissionsClaimed[m.claimKey],
+    );
+    if (visibleMissions.length === 0) return;
+
     const details = document.createElement('details');
     details.className = 'site-group';
     details.open = missionOpenGroups.has(group.siteKey);
@@ -736,7 +730,7 @@ function renderMissionGroups() {
 
     const itemsDiv = document.createElement('div');
     itemsDiv.className = 'site-group-items';
-    group.missions.forEach((mission) => itemsDiv.appendChild(buildMissionCard(mission, group.siteUrl)));
+    visibleMissions.forEach((mission) => itemsDiv.appendChild(buildMissionCard(mission, group.siteUrl)));
     details.appendChild(itemsDiv);
 
     list.appendChild(details);
