@@ -156,6 +156,7 @@ const MISSION_GROUPS = [
     siteKey: 'omikuji',
     siteNameKey: 'siteOmikuji',
     headerBg: '#fff3e0',
+    siteUrl: 'https://uko05.github.io/14_GenshinOmikuji/',
     missions: [
       {
         id: 'omikuji_like_given',
@@ -179,6 +180,7 @@ const MISSION_GROUPS = [
     siteKey: 'genshinRanking',
     siteNameKey: 'siteGenshinRanking',
     headerBg: '#e3f2fd',
+    siteUrl: 'https://uko05.github.io/TiersList01/',
     missions: [
       {
         id: 'genshinRankingImage',
@@ -194,6 +196,7 @@ const MISSION_GROUPS = [
     siteKey: 'starrailRankingPath',
     siteNameKey: 'siteStarrailRankingPath',
     headerBg: '#fce4ec',
+    siteUrl: 'https://uko05.github.io/TiersList02/',
     missions: [
       {
         id: 'starrailRankingPathImage',
@@ -209,6 +212,7 @@ const MISSION_GROUPS = [
     siteKey: 'starrailRankingElement',
     siteNameKey: 'siteStarrailRankingElement',
     headerBg: '#f3e5f5',
+    siteUrl: 'https://uko05.github.io/TiersList03/',
     missions: [
       {
         id: 'starrailRankingElementImage',
@@ -224,6 +228,7 @@ const MISSION_GROUPS = [
     siteKey: 'genshinFreeFormat',
     siteNameKey: 'siteGenshinFreeFormat',
     headerBg: '#e0f7fa',
+    siteUrl: 'https://uko05.github.io/genshinFormat04/',
     missions: [
       {
         id: 'genshinFreeFormatImage',
@@ -239,6 +244,7 @@ const MISSION_GROUPS = [
     siteKey: 'starrailFreeFormat',
     siteNameKey: 'siteStarrailFreeFormat',
     headerBg: '#ffe0b2',
+    siteUrl: 'https://uko05.github.io/starrailFormat05/',
     missions: [
       {
         id: 'starrailFreeFormatImage',
@@ -254,6 +260,7 @@ const MISSION_GROUPS = [
     siteKey: 'genshinCheck',
     siteNameKey: 'siteGenshinCheck',
     headerBg: '#e8f5e9',
+    siteUrl: 'https://uko05.github.io/genshinCheck06/',
     missions: [
       {
         id: 'genshinCheckImage',
@@ -269,6 +276,7 @@ const MISSION_GROUPS = [
     siteKey: 'starrailCheck',
     siteNameKey: 'siteStarrailCheck',
     headerBg: '#fff8e1',
+    siteUrl: 'https://uko05.github.io/starrailCheck07/',
     missions: [
       {
         id: 'starrailCheckImage',
@@ -284,6 +292,7 @@ const MISSION_GROUPS = [
     siteKey: 'playMaker',
     siteNameKey: 'sitePlayMaker',
     headerBg: '#ede7f6',
+    siteUrl: 'https://uko05.github.io/22_PlayMaker/',
     missions: [
       {
         id: 'playMakerImage',
@@ -314,6 +323,10 @@ const i18n = {
     missionAchievedCount: (n) => `達成回数：${n}回`,
     missionDoneLabel: '達成済み',
     missionNotDoneLabel: '未達成',
+    missionGoToSiteBtn: '移動する',
+    missionClaimBtn: '受け取る',
+    missionClaimSuccess: (n) => `+${n}UPを受け取りました！`,
+    missionNotAchievedYet: 'まだミッションの条件を達成していません。',
     costLabel: (n) => `${n}UP`,
     redeemBtn: '交換する',
     redeemedBtn: '交換済み',
@@ -393,6 +406,10 @@ const i18n = {
     missionAchievedCount: (n) => `Completed ${n} times`,
     missionDoneLabel: 'Done',
     missionNotDoneLabel: 'Not done yet',
+    missionGoToSiteBtn: 'Go',
+    missionClaimBtn: 'Claim',
+    missionClaimSuccess: (n) => `Claimed +${n}UP!`,
+    missionNotAchievedYet: "You haven't completed this mission's condition yet.",
     costLabel: (n) => `${n}UP`,
     redeemBtn: 'Redeem',
     redeemedBtn: 'Redeemed',
@@ -492,6 +509,7 @@ let latestRedemptionCounts = {};
 let latestOmikujiAchievements = [];
 let latestMissionStats = {};
 let latestMissionsClaimed = {};
+let latestMissionsAchieved = {};
 
 function hasAllOmikujiAchievements() {
   return OMIKUJI_ACHIEVEMENTS.every((a) => latestOmikujiAchievements.includes(a.id));
@@ -509,6 +527,7 @@ function startBalanceListener() {
       totalLikesReceived: data.totalLikesReceived || 0,
     };
     latestMissionsClaimed = data.missionsClaimed || {};
+    latestMissionsAchieved = data.missionsAchieved || {};
     if (el) el.textContent = latestUkoPoints;
     renderSiteGroups();
     renderMissionGroups();
@@ -614,8 +633,14 @@ function renderSiteGroups() {
   });
 }
 
-// ===== ミッション一覧の描画(交換所グループと同じ見た目) =====
-function buildMissionCard(mission) {
+// ===== ミッション一覧の描画(交換所グループと同じ見た目)
+// 一度きりミッション(claimKeyあり)はソシャゲ方式の3段階:
+//   ①未達成 → 「移動する」ボタンでサイトへ移動
+//   ②条件達成済み(missionsAchieved) → 「受け取る」ボタンでUP受け取り(この時初めてukoPoints加算)
+//   ③受け取り済み(missionsClaimed) → 「達成済み」表示のみ
+// 無制限ミッション(おみくじのいいね等)はその場でUPが付与される既存仕様のため、
+// 受け取るボタンは無く常に「移動する」+達成回数を表示する。 =====
+function buildMissionCard(mission, siteUrl) {
   const t = s();
   const card = document.createElement('div');
   card.className = 'item-card';
@@ -642,16 +667,44 @@ function buildMissionCard(mission) {
   const action = document.createElement('div');
   action.className = 'item-action';
 
-  const status = document.createElement('p');
-  status.className = 'item-mission-status';
+  const gotoBtn = () => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'item-mission-goto-btn';
+    btn.textContent = t.missionGoToSiteBtn;
+    btn.addEventListener('click', () => window.open(siteUrl, '_blank', 'noopener'));
+    return btn;
+  };
+
   if (mission.unlimited) {
+    action.appendChild(gotoBtn());
+    const status = document.createElement('p');
+    status.className = 'item-mission-status';
     status.textContent = `${t.missionUnlimitedLabel}\n${t.missionAchievedCount(latestMissionStats[mission.statKey] || 0)}`;
+    action.appendChild(status);
   } else {
-    const done = !!latestMissionsClaimed[mission.claimKey];
-    status.classList.toggle('item-mission-status-done', done);
-    status.textContent = done ? t.missionDoneLabel : t.missionNotDoneLabel;
+    const claimed = !!latestMissionsClaimed[mission.claimKey];
+    const achieved = !!latestMissionsAchieved[mission.claimKey];
+    if (claimed) {
+      const status = document.createElement('p');
+      status.className = 'item-mission-status item-mission-status-done';
+      status.textContent = t.missionDoneLabel;
+      action.appendChild(status);
+    } else if (achieved) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'item-mission-claim-btn';
+      btn.textContent = t.missionClaimBtn;
+      btn.addEventListener('click', () => handleMissionClaim(mission));
+      action.appendChild(btn);
+    } else {
+      action.appendChild(gotoBtn());
+      const status = document.createElement('p');
+      status.className = 'item-mission-status';
+      status.textContent = t.missionNotDoneLabel;
+      action.appendChild(status);
+    }
   }
-  action.appendChild(status);
 
   card.appendChild(action);
 
@@ -681,11 +734,44 @@ function renderMissionGroups() {
 
     const itemsDiv = document.createElement('div');
     itemsDiv.className = 'site-group-items';
-    group.missions.forEach((mission) => itemsDiv.appendChild(buildMissionCard(mission)));
+    group.missions.forEach((mission) => itemsDiv.appendChild(buildMissionCard(mission, group.siteUrl)));
     details.appendChild(itemsDiv);
 
     list.appendChild(details);
   });
+}
+
+// ===== ミッション報酬の受け取り(条件達成済み → 受け取り済みへ、この時にukoPointsを加算) =====
+async function handleMissionClaim(mission) {
+  const t = s();
+  const userId = getUserId();
+  const ref = doc(db, 'omikujiUsers', userId);
+
+  try {
+    const claimed = await runTransaction(db, async (tx) => {
+      const snap = await tx.get(ref);
+      if (!snap.exists()) throw new Error('NO_USER_DOC');
+      const data = snap.data();
+      if (data.missionsClaimed?.[mission.claimKey]) return false; // 二重クリック対策
+      if (!data.missionsAchieved?.[mission.claimKey]) throw new Error('NOT_ACHIEVED');
+
+      tx.update(ref, {
+        ukoPoints: increment(mission.reward),
+        [`missionsClaimed.${mission.claimKey}`]: true,
+      });
+      return true;
+    });
+    if (claimed) showToast(t.missionClaimSuccess(mission.reward), false);
+  } catch (e) {
+    if (e.message === 'NO_USER_DOC') {
+      showToast(t.redeemNoUserDoc, true);
+    } else if (e.message === 'NOT_ACHIEVED') {
+      showToast(t.missionNotAchievedYet, true);
+    } else {
+      console.error('[upoint] mission claim failed', e);
+      showToast(t.redeemFail, true);
+    }
+  }
 }
 
 // ===== タブ切り替え =====
