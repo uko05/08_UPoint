@@ -84,15 +84,6 @@ const SITE_GROUPS = [
     headerBg: '#e8f5e9', // うっすら緑
     items: [
       {
-        id: 'storage17_original_upload',
-        perkField: 'originalUpload',
-        perkType: 'flag',
-        cost: 100,
-        maxRedemptions: 1,
-        titleKey: 'itemStorageOriginalUploadTitle',
-        descKey: 'itemStorageOriginalUploadDesc',
-      },
-      {
         id: 'storage17_extra_daily_upload',
         perkField: 'extraDailyUploads',
         amount: 1,
@@ -351,8 +342,6 @@ const i18n = {
     itemAccountTitleUpChampionTitle: 'レジェンド称号「UP覇者」',
     itemAccountTitleUpChampionDesc: 'レジェンドレアリティの称号「UP覇者」を購入します。アカウント管理でいつでも設定できます。',
     siteStorage: '画像保管庫',
-    itemStorageOriginalUploadTitle: '元の画像のまま保存',
-    itemStorageOriginalUploadDesc: '画像保管庫で、圧縮せず元の画質のまま画像を保存できるようになります(一度交換すればずっと使えます。ただし1日5枚までの上限があります)。',
     itemStorageExtraUploadTitle: '1日のアップロード上限 ＋1枚',
     itemStorageExtraUploadDesc: '画像保管庫の1日のアップロード上限を永続的に+1枚します(最大10回まで交換可能、合計で+10枚まで)。',
     siteOmikuji: '原神おみくじ',
@@ -433,8 +422,6 @@ const i18n = {
     itemAccountTitleUpChampionTitle: 'Legend Title: "UP Champion"',
     itemAccountTitleUpChampionDesc: 'Purchase the legend-rarity title "UP Champion" (UP覇者). Equip it anytime from Account Center.',
     siteStorage: 'Image Storage',
-    itemStorageOriginalUploadTitle: 'Save originals uncompressed',
-    itemStorageOriginalUploadDesc: "Lets you save images to Image Storage at full original quality instead of compressed (a one-time purchase that lasts forever, but capped at 5 originals per day).",
     itemStorageExtraUploadTitle: 'Daily upload limit +1',
     itemStorageExtraUploadDesc: 'Permanently adds +1 to Image Storage\'s daily upload limit (redeemable up to 10 times, for up to +10 total).',
     siteOmikuji: 'Genshin Omikuji',
