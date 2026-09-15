@@ -183,7 +183,7 @@ const MISSION_GROUPS = [
       },
       {
         id: 'omikuji_gacha_draw',
-        reward: 50,
+        reward: 30,
         unlimited: false,
         claimKey: 'omikujiGachaDraw',
         titleKey: 'missionOmikujiGachaDrawTitle',
@@ -191,7 +191,7 @@ const MISSION_GROUPS = [
       },
       {
         id: 'omikuji_gacha_equip',
-        reward: 50,
+        reward: 30,
         unlimited: false,
         claimKey: 'omikujiGachaEquip',
         titleKey: 'missionOmikujiGachaEquipTitle',
@@ -199,7 +199,7 @@ const MISSION_GROUPS = [
       },
       {
         id: 'omikuji_auction_listing',
-        reward: 50,
+        reward: 30,
         unlimited: false,
         claimKey: 'omikujiAuctionListing',
         titleKey: 'missionOmikujiAuctionListingTitle',
@@ -207,7 +207,7 @@ const MISSION_GROUPS = [
       },
       {
         id: 'omikuji_auction_win',
-        reward: 50,
+        reward: 30,
         unlimited: false,
         claimKey: 'omikujiAuctionWin',
         titleKey: 'missionOmikujiAuctionWinTitle',
@@ -411,7 +411,7 @@ const i18n = {
     missionOmikujiGachaEquipDesc: 'アカウント登録・ログインした状態で、ガチャで手に入れた裏面デザインをおみくじカードに設定します。',
     missionOmikujiAuctionListingTitle: 'オークションに出品しよう',
     missionOmikujiAuctionListingDesc: 'アカウント登録・ログインした状態で、ガチャで手に入れた裏面デザインをうーこオークションに出品します。（うーこオークションは現在準備中です）',
-    missionOmikujiAuctionWinTitle: 'オークションを落札しよう',
+    missionOmikujiAuctionWinTitle: 'オークションで落札しよう',
     missionOmikujiAuctionWinDesc: 'アカウント登録・ログインした状態で、うーこオークションで入札に競り勝つか、即決購入して出品物を手に入れます。（うーこオークションは現在準備中です）',
     siteGenshinRanking: '原神推しキャラランキング',
     missionGenshinRankingImageTitle: '画像を1回生成する',
