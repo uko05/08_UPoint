@@ -131,6 +131,22 @@ const SITE_GROUPS = [
       },
     ],
   },
+  {
+    siteKey: 'genshinRanking',
+    siteNameKey: 'siteGenshinRanking',
+    headerBg: '#e3f2fd', // MISSION_GROUPSのgenshinRankingと同じ薄青
+    items: [
+      {
+        id: 'genshinRanking_nation_mode',
+        perkField: 'nationRankingUnlocked',
+        perkType: 'flag',
+        cost: 50,
+        maxRedemptions: 1,
+        titleKey: 'itemGenshinRankingNationTitle',
+        descKey: 'itemGenshinRankingNationDesc',
+      },
+    ],
+  },
 ];
 
 // サイト枠の開閉状態(再描画のたびに<details>を作り直すため、ここで覚えておく)
@@ -379,6 +395,8 @@ const i18n = {
     siteOmikuji: '原神おみくじ',
     itemOmikujiAchDisplayTitle: 'アチーブメント表示を解放',
     itemOmikujiAchDisplayDesc: 'アカウント管理で設定した称号が、おみくじの「みんなの結果」であなたの名前の横に表示されるようになります。',
+    itemGenshinRankingNationTitle: '推しキャラランキング「国別」タブを解放',
+    itemGenshinRankingNationDesc: '原神推しキャラランキングで、元素別に加えて国別(モンド/璃月/稲妻/スメール/フォンテーヌ/ナタ/スネージナヤ/ノド＝クライ/その他)でもランキングを作れるようになります。',
     itemOmikujiGachaTicketTitle: 'ガチャ券 ×1',
     itemOmikujiGachaTicketDesc: '原神おみくじの裏面デザインガチャを1回引けるガチャ券と交換します(何回でも交換できます)。',
     itemOmikujiTitleFateObserverTitle: 'レジェンド称号「運命の観測者」',
@@ -467,6 +485,8 @@ const i18n = {
     siteOmikuji: 'Genshin Omikuji',
     itemOmikujiAchDisplayTitle: 'Unlock Achievement Display',
     itemOmikujiAchDisplayDesc: "Shows the title you set on Account Center next to your name on Omikuji's \"Everyone's Results\" feed.",
+    itemGenshinRankingNationTitle: 'Unlock "By Nation" tab on Character Ranking',
+    itemGenshinRankingNationDesc: 'On Genshin Oshi Character Ranking, lets you build rankings by nation (Mondstadt/Liyue/Inazuma/Sumeru/Fontaine/Natlan/Snezhnaya/Nod-Krai/Other) in addition to by element.',
     itemOmikujiGachaTicketTitle: 'Gacha Ticket ×1',
     itemOmikujiGachaTicketDesc: 'Exchange for one gacha ticket to draw the Genshin Omikuji card-back gacha once (redeemable any number of times).',
     itemOmikujiTitleFateObserverTitle: 'Legend Title: "Fate Observer"',
