@@ -29,18 +29,54 @@ function getUserId() {
 // maxRedemptions: 1人が生涯に交換できる回数の上限。nullなら無制限。
 const SITE_GROUPS = [
   {
-    siteKey: 'friendBoard',
-    siteNameKey: 'siteFriendBoard',
-    headerBg: '#fff8e1', // うっすら黄色
+    siteKey: 'genshinRanking',
+    siteNameKey: 'siteGenshinRanking',
+    headerBg: '#e3f2fd', // MISSION_GROUPSのgenshinRankingと同じ薄青
     items: [
       {
-        id: 'friendboard_chat_plus5',
-        perkField: 'permanentExtraChat',
-        amount: 5,
+        id: 'genshinRanking_nation_mode',
+        perkField: 'nationRankingUnlocked',
+        perkType: 'flag',
+        cost: 50,
+        maxRedemptions: 1,
+        titleKey: 'itemGenshinRankingNationTitle',
+        descKey: 'itemGenshinRankingNationDesc',
+      },
+    ],
+  },
+  {
+    siteKey: 'omikuji',
+    siteNameKey: 'siteOmikuji',
+    headerBg: '#fff3e0', // うっすら橙
+    items: [
+      {
+        id: 'omikuji_achievement_display',
+        perkField: 'achievementDisplayUnlocked',
+        perkType: 'flag',
+        cost: 50,
+        maxRedemptions: 1,
+        titleKey: 'itemOmikujiAchDisplayTitle',
+        descKey: 'itemOmikujiAchDisplayDesc',
+      },
+      {
+        id: 'omikuji_gacha_ticket',
+        perkField: 'gachaTickets',
+        amount: 1,
         cost: 50,
         maxRedemptions: null,
-        titleKey: 'itemFriendBoardChatTitle',
-        descKey: 'itemFriendBoardChatDesc',
+        titleKey: 'itemOmikujiGachaTicketTitle',
+        descKey: 'itemOmikujiGachaTicketDesc',
+      },
+      {
+        id: 'omikuji_title_fate_observer',
+        perkField: 'titleFateObserverUnlocked',
+        perkType: 'flag',
+        cost: 100,
+        maxRedemptions: 1,
+        // 原神おみくじの実績を全部達成していないと交換できない特別枠
+        requiresAllOmikujiAchievements: true,
+        titleKey: 'itemOmikujiTitleFateObserverTitle',
+        descKey: 'itemOmikujiTitleFateObserverDesc',
       },
     ],
   },
@@ -96,54 +132,18 @@ const SITE_GROUPS = [
     ],
   },
   {
-    siteKey: 'omikuji',
-    siteNameKey: 'siteOmikuji',
-    headerBg: '#fff3e0', // うっすら橙
+    siteKey: 'friendBoard',
+    siteNameKey: 'siteFriendBoard',
+    headerBg: '#fff8e1', // うっすら黄色
     items: [
       {
-        id: 'omikuji_achievement_display',
-        perkField: 'achievementDisplayUnlocked',
-        perkType: 'flag',
-        cost: 50,
-        maxRedemptions: 1,
-        titleKey: 'itemOmikujiAchDisplayTitle',
-        descKey: 'itemOmikujiAchDisplayDesc',
-      },
-      {
-        id: 'omikuji_gacha_ticket',
-        perkField: 'gachaTickets',
-        amount: 1,
+        id: 'friendboard_chat_plus5',
+        perkField: 'permanentExtraChat',
+        amount: 5,
         cost: 50,
         maxRedemptions: null,
-        titleKey: 'itemOmikujiGachaTicketTitle',
-        descKey: 'itemOmikujiGachaTicketDesc',
-      },
-      {
-        id: 'omikuji_title_fate_observer',
-        perkField: 'titleFateObserverUnlocked',
-        perkType: 'flag',
-        cost: 100,
-        maxRedemptions: 1,
-        // 原神おみくじの実績を全部達成していないと交換できない特別枠
-        requiresAllOmikujiAchievements: true,
-        titleKey: 'itemOmikujiTitleFateObserverTitle',
-        descKey: 'itemOmikujiTitleFateObserverDesc',
-      },
-    ],
-  },
-  {
-    siteKey: 'genshinRanking',
-    siteNameKey: 'siteGenshinRanking',
-    headerBg: '#e3f2fd', // MISSION_GROUPSのgenshinRankingと同じ薄青
-    items: [
-      {
-        id: 'genshinRanking_nation_mode',
-        perkField: 'nationRankingUnlocked',
-        perkType: 'flag',
-        cost: 50,
-        maxRedemptions: 1,
-        titleKey: 'itemGenshinRankingNationTitle',
-        descKey: 'itemGenshinRankingNationDesc',
+        titleKey: 'itemFriendBoardChatTitle',
+        descKey: 'itemFriendBoardChatDesc',
       },
     ],
   },
