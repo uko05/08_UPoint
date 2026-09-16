@@ -216,6 +216,22 @@ const MISSION_GROUPS = [
     ],
   },
   {
+    siteKey: 'storage17',
+    siteNameKey: 'siteStorage',
+    headerBg: '#e8f5e9', // SITE_GROUPSのstorage17と同じ薄緑
+    siteUrl: 'https://uko05.github.io/17_storage/',
+    missions: [
+      {
+        id: 'storage17_upload',
+        reward: 20,
+        unlimited: false,
+        claimKey: 'storage17Upload',
+        titleKey: 'missionStorage17UploadTitle',
+        descKey: 'missionStorage17UploadDesc',
+      },
+    ],
+  },
+  {
     siteKey: 'genshinRanking',
     siteNameKey: 'siteGenshinRanking',
     headerBg: '#e3f2fd',
@@ -413,6 +429,8 @@ const i18n = {
     missionOmikujiAuctionListingDesc: 'アカウント登録・ログインした状態で、ガチャで手に入れた裏面デザインをうーこオークションに出品します。',
     missionOmikujiAuctionWinTitle: 'オークションで落札しよう',
     missionOmikujiAuctionWinDesc: 'アカウント登録・ログインした状態で、うーこオークションで入札に競り勝つか、即決購入して出品物を手に入れます。',
+    missionStorage17UploadTitle: '画像保管庫に画像を保管しよう',
+    missionStorage17UploadDesc: 'アカウント登録・ログインした状態で、画像保管庫に画像を1枚保管します。',
     siteGenshinRanking: '原神推しキャラランキング',
     missionGenshinRankingImageTitle: '画像を1回生成する',
     missionGenshinRankingImageDesc: 'アカウントログインした状態で画像を生成する。',
@@ -503,6 +521,8 @@ const i18n = {
     missionOmikujiAuctionListingDesc: 'While registered and logged in, list a card-back design you got from the gacha on Uko Auction.',
     missionOmikujiAuctionWinTitle: 'Win an auction',
     missionOmikujiAuctionWinDesc: 'While registered and logged in, win an item on Uko Auction by outbidding others or buying it now.',
+    missionStorage17UploadTitle: 'Save an image to the Image Storage',
+    missionStorage17UploadDesc: 'While registered and logged in, save one image to the Image Storage.',
     siteGenshinRanking: 'Genshin Oshi Character Ranking',
     missionGenshinRankingImageTitle: 'Generate an image once',
     missionGenshinRankingImageDesc: 'Generate an image while logged into your account.',
