@@ -224,7 +224,7 @@ const MISSION_GROUPS = [
         reward: 1000,
         unlimited: false,
         claimKey: 'omikujiAchPeerlessCollector',
-        // 裏面デザイン206種中200種収集(gacha_col_200)の上位実績。上と同じくUPのみ。
+        // 裏面デザインNo.1〜200を全部収集(gacha_col_200)の上位実績。上と同じくUPのみ。
         requiresOmikujiAchievementId: 'gacha_col_200',
         titleKey: 'missionOmikujiPeerlessCollectorTitle',
         descKey: 'missionOmikujiPeerlessCollectorDesc',
@@ -435,7 +435,7 @@ const i18n = {
     missionOmikujiGrandSkinCollectorTitle: '実績「グランドスキンコレクター」達成',
     missionOmikujiGrandSkinCollectorDesc: '原神おみくじの実績「グランドスキンコレクター」（裏面デザインを100種収集する）を達成すると、UPがもらえます。',
     missionOmikujiPeerlessCollectorTitle: '実績「唯一無二のコレクター」達成',
-    missionOmikujiPeerlessCollectorDesc: '原神おみくじの実績「唯一無二のコレクター」（裏面デザインを200種収集する）を達成すると、UPがもらえます。',
+    missionOmikujiPeerlessCollectorDesc: '原神おみくじの実績「唯一無二のコレクター」（裏面デザインNo.1〜200をすべて収集する）を達成すると、UPがもらえます。',
     missionOmikujiLikeGivenTitle: '他人の結果にいいねをする',
     missionOmikujiLikeGivenDesc: '原神おみくじの「みんなの結果」で、他の人の占い結果に「いいね」を押します。',
     missionOmikujiLikeReceivedTitle: '自分の結果にいいねをされる',
@@ -530,7 +530,7 @@ const i18n = {
     missionOmikujiGrandSkinCollectorTitle: 'Complete "Grand Skin Collector"',
     missionOmikujiGrandSkinCollectorDesc: 'Complete the Genshin Omikuji achievement "Grand Skin Collector" (collect 100 card-back designs) and you\'ll get UP.',
     missionOmikujiPeerlessCollectorTitle: 'Complete "Peerless Collector"',
-    missionOmikujiPeerlessCollectorDesc: 'Complete the Genshin Omikuji achievement "Peerless Collector" (collect 200 card-back designs) and you\'ll get UP.',
+    missionOmikujiPeerlessCollectorDesc: 'Complete the Genshin Omikuji achievement "Peerless Collector" (collect all card-back designs No.1–200) and you\'ll get UP.',
     missionOmikujiLikeGivenTitle: 'Like someone else\'s result',
     missionOmikujiLikeGivenDesc: 'On Genshin Omikuji\'s "Everyone\'s Results", tap "like" on another person\'s fortune.',
     missionOmikujiLikeReceivedTitle: 'Get your result liked',
