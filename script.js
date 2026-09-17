@@ -203,26 +203,31 @@ const MISSION_GROUPS = [
         descKey: 'missionOmikujiAuctionWinDesc',
       },
       {
-        id: 'omikuji_title_fate_observer',
-        reward: 100,
+        id: 'omikuji_ach_grand_skin_collector',
+        reward: 500,
         unlimited: false,
-        claimKey: 'omikujiTitleFateObserver',
+        claimKey: 'omikujiAchGrandSkinCollector',
         // 他のミッションと違い、missionsAchievedフラグではなく実績の達成状況そのもので
         // 条件判定する特別枠(交換所の旧omikuji_title_fate_observerアイテムから移行)。
-        // 「実績を全部集めた」というすごいことを称号だけでなくUPでも労いたい、という
-        // 理由で交換(購入)からミッション(達成で自動的にもらえる)に変更した。
-        // 元は「全実績達成」を条件にしていたが、将来「1〜200種類集める」のような
-        // 新しいコンプ系実績が増えると、この称号の実質的な取得難度がそちらに
-        // 引きずられて変わってしまうため、v(2026-09-17)で特定の実績1つ
-        // (gacha_col_100=裏面デザインを100種収集する)だけをピンポイントで
-        // 条件にする方式に変更した。新しい実績が増えても、この称号の難度は
-        // 「裏面デザイン100種」のまま固定される。
+        // UPのみを渡すミッション(称号は付与しない。実績を達成した時点でAccountCenter側の
+        // 実績称号「グランドスキンコレクター」自体を設定できるようになるため、それとは別に
+        // 「運命の観測者」というボーナス称号をここで重ねて渡す必要が無くなった。
+        // 2026-09-17: 元は「運命の観測者」を渡すミッションだったが、より難しい上位実績
+        // (gacha_col_200=唯一無二のコレクター)を新設したのに合わせて、両方とも
+        // UPのみのミッションに統一した)。
         requiresOmikujiAchievementId: 'gacha_col_100',
-        // 称号の解放フラグも同時に付与する(交換アイテムのperkField相当)。
-        perkSiteKey: 'omikuji',
-        perkField: 'titleFateObserverUnlocked',
-        titleKey: 'missionOmikujiTitleFateObserverTitle',
-        descKey: 'missionOmikujiTitleFateObserverDesc',
+        titleKey: 'missionOmikujiGrandSkinCollectorTitle',
+        descKey: 'missionOmikujiGrandSkinCollectorDesc',
+      },
+      {
+        id: 'omikuji_ach_peerless_collector',
+        reward: 1000,
+        unlimited: false,
+        claimKey: 'omikujiAchPeerlessCollector',
+        // 裏面デザイン206種中200種収集(gacha_col_200)の上位実績。上と同じくUPのみ。
+        requiresOmikujiAchievementId: 'gacha_col_200',
+        titleKey: 'missionOmikujiPeerlessCollectorTitle',
+        descKey: 'missionOmikujiPeerlessCollectorDesc',
       },
     ],
   },
@@ -427,8 +432,10 @@ const i18n = {
     itemGenshinRankingNationDesc: '原神推しキャラランキングで、元素別に加えて国別(モンド/璃月/稲妻/スメール/フォンテーヌ/ナタ/スネージナヤ/ノド＝クライ/その他)でもランキングを作れるようになります。',
     itemOmikujiGachaTicketTitle: 'ガチャ券 ×1',
     itemOmikujiGachaTicketDesc: '原神おみくじの裏面デザインガチャを1回引けるガチャ券と交換します(何回でも交換できます)。',
-    missionOmikujiTitleFateObserverTitle: 'レジェンド称号「運命の観測者」＋100UP',
-    missionOmikujiTitleFateObserverDesc: '原神おみくじの実績「グランドスキンコレクター」（裏面デザインを100種収集する）を達成すると、レジェンドレアリティの称号「運命の観測者」とUPが一緒にもらえます。称号はアカウント管理でいつでも設定できます。',
+    missionOmikujiGrandSkinCollectorTitle: '実績「グランドスキンコレクター」達成',
+    missionOmikujiGrandSkinCollectorDesc: '原神おみくじの実績「グランドスキンコレクター」（裏面デザインを100種収集する）を達成すると、UPがもらえます。',
+    missionOmikujiPeerlessCollectorTitle: '実績「唯一無二のコレクター」達成',
+    missionOmikujiPeerlessCollectorDesc: '原神おみくじの実績「唯一無二のコレクター」（裏面デザインを200種収集する）を達成すると、UPがもらえます。',
     missionOmikujiLikeGivenTitle: '他人の結果にいいねをする',
     missionOmikujiLikeGivenDesc: '原神おみくじの「みんなの結果」で、他の人の占い結果に「いいね」を押します。',
     missionOmikujiLikeReceivedTitle: '自分の結果にいいねをされる',
@@ -520,8 +527,10 @@ const i18n = {
     itemGenshinRankingNationDesc: 'On Genshin Oshi Character Ranking, lets you build rankings by nation (Mondstadt/Liyue/Inazuma/Sumeru/Fontaine/Natlan/Snezhnaya/Nod-Krai/Other) in addition to by element.',
     itemOmikujiGachaTicketTitle: 'Gacha Ticket ×1',
     itemOmikujiGachaTicketDesc: 'Exchange for one gacha ticket to draw the Genshin Omikuji card-back gacha once (redeemable any number of times).',
-    missionOmikujiTitleFateObserverTitle: 'Legend Title: "Fate Observer" + 100UP',
-    missionOmikujiTitleFateObserverDesc: 'Complete the Genshin Omikuji achievement "Grand Skin Collector" (collect 100 card-back designs) and you\'ll get the legend-rarity title "Fate Observer" (運命の観測者) along with UP. Equip the title anytime from Account Center.',
+    missionOmikujiGrandSkinCollectorTitle: 'Complete "Grand Skin Collector"',
+    missionOmikujiGrandSkinCollectorDesc: 'Complete the Genshin Omikuji achievement "Grand Skin Collector" (collect 100 card-back designs) and you\'ll get UP.',
+    missionOmikujiPeerlessCollectorTitle: 'Complete "Peerless Collector"',
+    missionOmikujiPeerlessCollectorDesc: 'Complete the Genshin Omikuji achievement "Peerless Collector" (collect 200 card-back designs) and you\'ll get UP.',
     missionOmikujiLikeGivenTitle: 'Like someone else\'s result',
     missionOmikujiLikeGivenDesc: 'On Genshin Omikuji\'s "Everyone\'s Results", tap "like" on another person\'s fortune.',
     missionOmikujiLikeReceivedTitle: 'Get your result liked',
@@ -602,10 +611,11 @@ function hasAllOmikujiAchievements() {
 }
 
 // 通常の一度きりミッションはmissionsAchieved.{claimKey}という外部サイト側から立てる
-// フラグで判定するが、requiresOmikujiAchievementIdを持つ特別枠(運命の観測者)だけは
-// 指定した実績1つを達成済みかどうかで判定する(交換アイテムだった頃のrequirementMetと
-// 同じ発想だが、「全実績達成」ではなく特定の実績1つに固定している。理由は
-// omikuji_title_fate_observerの定義コメント参照)。
+// フラグで判定するが、requiresOmikujiAchievementIdを持つ特別枠(グランドスキン
+// コレクター/唯一無二のコレクター)だけは指定した実績1つを達成済みかどうかで判定する
+// (交換アイテムだった頃のrequirementMetと同じ発想だが、「全実績達成」ではなく
+// 特定の実績1つに固定している。理由はomikuji_ach_grand_skin_collectorの
+// 定義コメント参照)。
 function isMissionAchievedCached(mission) {
   if (mission.requiresOmikujiAchievementId) return latestOmikujiAchievements.includes(mission.requiresOmikujiAchievementId);
   return !!latestMissionsAchieved[mission.claimKey];
