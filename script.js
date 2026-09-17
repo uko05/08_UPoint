@@ -67,17 +67,6 @@ const SITE_GROUPS = [
         titleKey: 'itemOmikujiGachaTicketTitle',
         descKey: 'itemOmikujiGachaTicketDesc',
       },
-      {
-        id: 'omikuji_title_fate_observer',
-        perkField: 'titleFateObserverUnlocked',
-        perkType: 'flag',
-        cost: 100,
-        maxRedemptions: 1,
-        // 原神おみくじの実績を全部達成していないと交換できない特別枠
-        requiresAllOmikujiAchievements: true,
-        titleKey: 'itemOmikujiTitleFateObserverTitle',
-        descKey: 'itemOmikujiTitleFateObserverDesc',
-      },
     ],
   },
   {
@@ -212,6 +201,22 @@ const MISSION_GROUPS = [
         claimKey: 'omikujiAuctionWin',
         titleKey: 'missionOmikujiAuctionWinTitle',
         descKey: 'missionOmikujiAuctionWinDesc',
+      },
+      {
+        id: 'omikuji_title_fate_observer',
+        reward: 100,
+        unlimited: false,
+        claimKey: 'omikujiTitleFateObserver',
+        // 他のミッションと違い、missionsAchievedフラグではなく実績の達成数そのもので
+        // 条件判定する特別枠(交換所の旧omikuji_title_fate_observerアイテムから移行)。
+        // 「実績を全部集めた」というすごいことを称号だけでなくUPでも労いたい、という
+        // 理由で交換(購入)からミッション(達成で自動的にもらえる)に変更した。
+        requiresAllOmikujiAchievements: true,
+        // 称号の解放フラグも同時に付与する(交換アイテムのperkField相当)。
+        perkSiteKey: 'omikuji',
+        perkField: 'titleFateObserverUnlocked',
+        titleKey: 'missionOmikujiTitleFateObserverTitle',
+        descKey: 'missionOmikujiTitleFateObserverDesc',
       },
     ],
   },
@@ -415,8 +420,8 @@ const i18n = {
     itemGenshinRankingNationDesc: '原神推しキャラランキングで、元素別に加えて国別(モンド/璃月/稲妻/スメール/フォンテーヌ/ナタ/スネージナヤ/ノド＝クライ/その他)でもランキングを作れるようになります。',
     itemOmikujiGachaTicketTitle: 'ガチャ券 ×1',
     itemOmikujiGachaTicketDesc: '原神おみくじの裏面デザインガチャを1回引けるガチャ券と交換します(何回でも交換できます)。',
-    itemOmikujiTitleFateObserverTitle: 'レジェンド称号「運命の観測者」',
-    itemOmikujiTitleFateObserverDesc: '原神おみくじの実績を全部達成すると購入できる、レジェンドレアリティの称号「運命の観測者」です。アカウント管理でいつでも設定できます。',
+    missionOmikujiTitleFateObserverTitle: 'レジェンド称号「運命の観測者」＋100UP',
+    missionOmikujiTitleFateObserverDesc: '原神おみくじの実績を全部達成すると、レジェンドレアリティの称号「運命の観測者」とUPが一緒にもらえます。称号はアカウント管理でいつでも設定できます。',
     missionOmikujiLikeGivenTitle: '他人の結果にいいねをする',
     missionOmikujiLikeGivenDesc: '原神おみくじの「みんなの結果」で、他の人の占い結果に「いいね」を押します。',
     missionOmikujiLikeReceivedTitle: '自分の結果にいいねをされる',
@@ -507,8 +512,8 @@ const i18n = {
     itemGenshinRankingNationDesc: 'On Genshin Oshi Character Ranking, lets you build rankings by nation (Mondstadt/Liyue/Inazuma/Sumeru/Fontaine/Natlan/Snezhnaya/Nod-Krai/Other) in addition to by element.',
     itemOmikujiGachaTicketTitle: 'Gacha Ticket ×1',
     itemOmikujiGachaTicketDesc: 'Exchange for one gacha ticket to draw the Genshin Omikuji card-back gacha once (redeemable any number of times).',
-    itemOmikujiTitleFateObserverTitle: 'Legend Title: "Fate Observer"',
-    itemOmikujiTitleFateObserverDesc: 'A legend-rarity title, "Fate Observer" (運命の観測者), purchasable once you\'ve completed every Genshin Omikuji achievement. Equip it anytime from Account Center.',
+    missionOmikujiTitleFateObserverTitle: 'Legend Title: "Fate Observer" + 100UP',
+    missionOmikujiTitleFateObserverDesc: 'Complete every Genshin Omikuji achievement and you\'ll get the legend-rarity title "Fate Observer" (運命の観測者) along with UP. Equip the title anytime from Account Center.',
     missionOmikujiLikeGivenTitle: 'Like someone else\'s result',
     missionOmikujiLikeGivenDesc: 'On Genshin Omikuji\'s "Everyone\'s Results", tap "like" on another person\'s fortune.',
     missionOmikujiLikeReceivedTitle: 'Get your result liked',
@@ -586,6 +591,22 @@ let latestMissionsAchieved = {};
 
 function hasAllOmikujiAchievements() {
   return OMIKUJI_ACHIEVEMENTS.every((a) => latestOmikujiAchievements.includes(a.id));
+}
+
+// 通常の一度きりミッションはmissionsAchieved.{claimKey}という外部サイト側から立てる
+// フラグで判定するが、requiresAllOmikujiAchievementsを持つ特別枠(運命の観測者)だけは
+// 実績の達成数そのもので判定する(交換アイテムだった頃のrequirementMetと同じロジック)。
+function isMissionAchievedCached(mission) {
+  if (mission.requiresAllOmikujiAchievements) return hasAllOmikujiAchievements();
+  return !!latestMissionsAchieved[mission.claimKey];
+}
+// handleMissionClaimのトランザクション内で使う版(tx.get()した最新dataを見る)。
+function isMissionAchievedFromData(mission, data) {
+  if (mission.requiresAllOmikujiAchievements) {
+    const myAchievements = data.achievements || [];
+    return OMIKUJI_ACHIEVEMENTS.every((a) => myAchievements.includes(a.id));
+  }
+  return !!data.missionsAchieved?.[mission.claimKey];
 }
 
 function startBalanceListener() {
@@ -735,6 +756,13 @@ function buildMissionCard(mission, siteUrl) {
   desc.className = 'item-desc';
   desc.textContent = t[mission.descKey];
   info.appendChild(desc);
+  if (mission.requiresAllOmikujiAchievements) {
+    const have = OMIKUJI_ACHIEVEMENTS.filter((a) => latestOmikujiAchievements.includes(a.id)).length;
+    const condition = document.createElement('p');
+    condition.className = 'item-desc item-condition';
+    condition.textContent = t.conditionOmikujiAllAch(have, OMIKUJI_ACHIEVEMENTS.length);
+    info.appendChild(condition);
+  }
   card.appendChild(info);
 
   const action = document.createElement('div');
@@ -755,7 +783,7 @@ function buildMissionCard(mission, siteUrl) {
     status.className = 'item-mission-status';
     status.textContent = `${t.missionUnlimitedLabel}\n${t.missionAchievedCount(latestMissionStats[mission.statKey] || 0)}`;
     action.appendChild(status);
-  } else if (latestMissionsAchieved[mission.claimKey]) {
+  } else if (isMissionAchievedCached(mission)) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'item-mission-btn item-mission-btn-claim';
@@ -824,12 +852,17 @@ async function handleMissionClaim(mission) {
       if (!snap.exists()) throw new Error('NO_USER_DOC');
       const data = snap.data();
       if (data.missionsClaimed?.[mission.claimKey]) return false; // 二重クリック対策
-      if (!data.missionsAchieved?.[mission.claimKey]) throw new Error('NOT_ACHIEVED');
+      if (!isMissionAchievedFromData(mission, data)) throw new Error('NOT_ACHIEVED');
 
-      tx.update(ref, {
+      const updates = {
         ukoPoints: increment(mission.reward),
         [`missionsClaimed.${mission.claimKey}`]: true,
-      });
+      };
+      // 運命の観測者のような、UPだけでなく称号(sitePerksのflag)も一緒に付与する特別枠
+      if (mission.perkSiteKey && mission.perkField) {
+        updates[`sitePerks.${mission.perkSiteKey}.${mission.perkField}`] = true;
+      }
+      tx.update(ref, updates);
       return true;
     });
     if (claimed) showToast(t.missionClaimSuccess(mission.reward), false);
