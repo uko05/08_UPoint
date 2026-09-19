@@ -4,7 +4,7 @@
 
 import { db } from './firebaseConfig.js';
 import {
-  doc, onSnapshot, runTransaction, increment, Timestamp,
+  doc, collection, onSnapshot, runTransaction, increment, Timestamp, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { ALL_ACHIEVEMENTS as OMIKUJI_ACHIEVEMENTS } from 'https://uko05.github.io/14_GenshinOmikuji/achievements.js';
 
@@ -931,6 +931,12 @@ async function handleMissionClaim(mission) {
         updates[`sitePerks.${mission.perkSiteKey}.${mission.perkField}`] = true;
       }
       tx.update(ref, updates);
+      // UP取得履歴(管理者画面用の監査ログ、2026-09-19追加)。トランザクション内では
+      // addDoc()が使えないため、事前にdoc(collection(...))でrefを作りtx.set()する。
+      tx.set(doc(collection(db, 'ukoPointsLog')), {
+        userId, amount: mission.reward, type: 'missionClaim',
+        meta: { claimKey: mission.claimKey }, createdAt: serverTimestamp(),
+      });
       return true;
     });
     if (claimed) showToast(t.missionClaimSuccess(mission.reward), false);
