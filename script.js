@@ -4,7 +4,7 @@
 
 import { db } from './firebaseConfig.js';
 import {
-  doc, onSnapshot, runTransaction, increment,
+  doc, onSnapshot, runTransaction, increment, Timestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { ALL_ACHIEVEMENTS as OMIKUJI_ACHIEVEMENTS } from 'https://uko05.github.io/14_GenshinOmikuji/achievements.js';
 
@@ -27,6 +27,12 @@ function getUserId() {
 // 永続的に加算していく値。各サイト側はこのフィールドをそのまま自分の基礎値に
 // 上乗せして使う(日付リセットは無い、ずっと効き続ける特典)。
 // maxRedemptions: 1人が生涯に交換できる回数の上限。nullなら無制限。
+// perkType: 'flag'=一度きりの解放フラグ(true固定)。省略時は'amount'を数値加算
+// (increment)。'timedBoost'(2026-09-19追加)は少し特殊で、perkFieldにFirestore
+// Timestampを書き込み、「その時刻まで効果が続く」形の時限ブースト。durationMsが
+// 1回の交換で延びる時間(ミリ秒)。現在の期限が未来ならそこからさらに延長し(スタッキング)、
+// 既に切れているか未設定なら「今から」延長する(handleRedeem参照)。
+
 const SITE_GROUPS = [
   {
     siteKey: 'genshinRanking',
@@ -66,6 +72,35 @@ const SITE_GROUPS = [
         maxRedemptions: null,
         titleKey: 'itemOmikujiGachaTicketTitle',
         descKey: 'itemOmikujiGachaTicketDesc',
+      },
+      {
+        id: 'omikuji_listing_like_unlock',
+        perkField: 'listingLikeUnlocked',
+        perkType: 'flag',
+        cost: 200,
+        maxRedemptions: 1,
+        titleKey: 'itemOmikujiListingLikeTitle',
+        descKey: 'itemOmikujiListingLikeDesc',
+      },
+      {
+        id: 'omikuji_like_give_boost',
+        perkField: 'likeGiveBoostUntil',
+        perkType: 'timedBoost',
+        durationMs: 24 * 60 * 60 * 1000,
+        cost: 50,
+        maxRedemptions: 5,
+        titleKey: 'itemOmikujiLikeGiveBoostTitle',
+        descKey: 'itemOmikujiLikeGiveBoostDesc',
+      },
+      {
+        id: 'omikuji_like_receive_boost',
+        perkField: 'likeReceiveBoostUntil',
+        perkType: 'timedBoost',
+        durationMs: 24 * 60 * 60 * 1000,
+        cost: 50,
+        maxRedemptions: 5,
+        titleKey: 'itemOmikujiLikeReceiveBoostTitle',
+        descKey: 'itemOmikujiLikeReceiveBoostDesc',
       },
     ],
   },
@@ -432,6 +467,12 @@ const i18n = {
     itemGenshinRankingNationDesc: '原神推しキャラランキングで、元素別に加えて国別(モンド/璃月/稲妻/スメール/フォンテーヌ/ナタ/スネージナヤ/ノド＝クライ/その他)でもランキングを作れるようになります。',
     itemOmikujiGachaTicketTitle: 'ガチャ券 ×1',
     itemOmikujiGachaTicketDesc: '原神おみくじの裏面デザインガチャを1回引けるガチャ券と交換します(何回でも交換できます)。',
+    itemOmikujiListingLikeTitle: 'オークション出品へのいいねを解放',
+    itemOmikujiListingLikeDesc: '「みんなの結果」に流れるオークション出品のお知らせにも、通常の結果と同じようにいいねできるようになります(永続的な効果です)。',
+    itemOmikujiLikeGiveBoostTitle: 'アゲいいねUPアップ（24時間）',
+    itemOmikujiLikeGiveBoostDesc: '交換してから24時間、他の人の結果にいいねした時にもらえるUPが+1されます(通常1UP→2UPに。最大5回まで交換できます)。',
+    itemOmikujiLikeReceiveBoostTitle: 'モラいいねUPアップ（24時間）',
+    itemOmikujiLikeReceiveBoostDesc: '交換してから24時間、自分の結果にいいねをもらった時のUPが+1されます(通常2UP→3UPに。最大5回まで交換できます)。',
     missionOmikujiGrandSkinCollectorTitle: '実績「グランドスキンコレクター」達成',
     missionOmikujiGrandSkinCollectorDesc: '原神おみくじの実績「グランドスキンコレクター」（裏面デザインを100種収集する）を達成すると、UPがもらえます。',
     missionOmikujiPeerlessCollectorTitle: '実績「唯一無二のコレクター」達成',
@@ -527,6 +568,12 @@ const i18n = {
     itemGenshinRankingNationDesc: 'On Genshin Oshi Character Ranking, lets you build rankings by nation (Mondstadt/Liyue/Inazuma/Sumeru/Fontaine/Natlan/Snezhnaya/Nod-Krai/Other) in addition to by element.',
     itemOmikujiGachaTicketTitle: 'Gacha Ticket ×1',
     itemOmikujiGachaTicketDesc: 'Exchange for one gacha ticket to draw the Genshin Omikuji card-back gacha once (redeemable any number of times).',
+    itemOmikujiListingLikeTitle: 'Unlock Auction Listing Likes',
+    itemOmikujiListingLikeDesc: 'Lets you like auction listing posts on the "Everyone\'s Results" feed, just like regular results (permanent effect).',
+    itemOmikujiLikeGiveBoostTitle: '+1UP per Like Given (24h)',
+    itemOmikujiLikeGiveBoostDesc: 'For 24 hours after redeeming, you get +1UP when you like someone else\'s result (normally 1UP → 2UP. Redeemable up to 5 times).',
+    itemOmikujiLikeReceiveBoostTitle: '+1UP per Like Received (24h)',
+    itemOmikujiLikeReceiveBoostDesc: 'For 24 hours after redeeming, you get +1UP when someone likes your result (normally 2UP → 3UP. Redeemable up to 5 times).',
     missionOmikujiGrandSkinCollectorTitle: 'Complete "Grand Skin Collector"',
     missionOmikujiGrandSkinCollectorDesc: 'Complete the Genshin Omikuji achievement "Grand Skin Collector" (collect 100 card-back designs) and you\'ll get UP.',
     missionOmikujiPeerlessCollectorTitle: 'Complete "Peerless Collector"',
@@ -942,7 +989,19 @@ async function handleRedeem(item, siteKey) {
       // 永続的に効く特典なので、対象サイト側のフィールドへそのまま加算していく
       // (日付での期限切れは無い)。perkType:'flag'の項目は数値加算ではなく
       // true を直接立てるだけの一度きりの解放フラグとして扱う。
-      const perkValue = item.perkType === 'flag' ? true : increment(item.amount);
+      // perkType:'timedBoost'は時限ブースト(SITE_GROUPSの解説コメント参照)。
+      // 既存の期限が未来ならそこからさらにdurationMs延長(スタッキング)、
+      // 切れている/未設定なら「今から」durationMs分の期限にする。
+      let perkValue;
+      if (item.perkType === 'flag') {
+        perkValue = true;
+      } else if (item.perkType === 'timedBoost') {
+        const currentExpiryMs = data.sitePerks?.[siteKey]?.[item.perkField]?.toMillis?.() || 0;
+        const baseMs = Math.max(currentExpiryMs, Date.now());
+        perkValue = Timestamp.fromMillis(baseMs + item.durationMs);
+      } else {
+        perkValue = increment(item.amount);
+      }
       tx.update(ref, {
         ukoPoints: increment(-item.cost),
         [`sitePerks.${siteKey}.${item.perkField}`]: perkValue,
