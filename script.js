@@ -436,7 +436,9 @@ const i18n = {
     redeemBtn: '交換する',
     redeemedBtn: '交換済み',
     redeemConfirm: (title, cost) => `「${title}」と${cost}UPを交換しますか？`,
+    redeemConfirmQty: (title, qty, totalCost) => `「${title}」を${qty}個、合計${totalCost}UPで交換しますか？`,
     redeemSuccess: (title) => `「${title}」と交換しました！`,
+    redeemSuccessQty: (title, qty) => `「${title}」を${qty}個、交換しました！`,
     redeemInsufficientPoints: 'UPが足りません。',
     redeemNoUserDoc: 'まだUPがありません。原神おみくじでいいねをしてUPを貯めてから来てください。',
     redeemFail: '交換に失敗しました。時間をおいて再度お試しください。',
@@ -537,7 +539,9 @@ const i18n = {
     redeemBtn: 'Redeem',
     redeemedBtn: 'Redeemed',
     redeemConfirm: (title, cost) => `Redeem "${title}" for ${cost}UP?`,
+    redeemConfirmQty: (title, qty, totalCost) => `Redeem ${qty}x "${title}" for ${totalCost}UP total?`,
     redeemSuccess: (title) => `Redeemed "${title}"!`,
+    redeemSuccessQty: (title, qty) => `Redeemed ${qty}x "${title}"!`,
     redeemInsufficientPoints: 'Not enough UP.',
     redeemNoUserDoc: "You don't have any UP yet. Like some results on Genshin Omikuji first to earn UP.",
     redeemFail: 'Redemption failed. Please try again later.',
@@ -648,6 +652,11 @@ function initLangSwitch() {
 // ===== 所持UPのリアルタイム表示 =====
 let latestUkoPoints = 0;
 let latestRedemptionCounts = {};
+// perkTypeが省略(=数値加算/amount)のアイテムだけ、-/+で個数を選んでまとめて交換できる
+// (2026-09-20追加。ガチャ券を1枚ずつしか交換できないのが手間、という要望から)。
+// item.idごとに選択中の個数を保持する(既定1、残高やmaxRedemptionsが変わるたびに
+// buildItemCard側でクランプする)。
+const redeemQtyByItemId = new Map();
 let latestOmikujiAchievements = [];
 let latestMissionStats = {};
 let latestMissionsClaimed = {};
@@ -738,15 +747,68 @@ function buildItemCard(item, siteKey) {
   const action = document.createElement('div');
   action.className = 'item-action';
 
+  // 個数選択(-/+): perkTypeが省略(=数値をそのまま加算するamount型)のアイテムだけ対象。
+  // flag(一度きりの解放)・timedBoost(期限延長)は「個数」という概念に馴染まないため、
+  // 従来通り1回ずつのボタンのまま(2026-09-20追加、ガチャ券を1枚ずつしか交換できず
+  // 面倒という要望から)。
+  const isQtyItem = item.perkType == null && !limitReached && requirementMet;
+  let qty = 1;
+  if (isQtyItem) {
+    const maxByBalance = Math.floor(latestUkoPoints / item.cost);
+    const maxByLimit = item.maxRedemptions != null ? Math.max(0, item.maxRedemptions - redeemedCount) : Infinity;
+    const maxQty = Math.max(0, Math.min(maxByBalance, maxByLimit));
+    qty = Math.min(Math.max(redeemQtyByItemId.get(item.id) ?? 1, 1), Math.max(maxQty, 1));
+    redeemQtyByItemId.set(item.id, qty);
+
+    const qtyRow = document.createElement('div');
+    qtyRow.className = 'item-qty-row';
+
+    const minusBtn = document.createElement('button');
+    minusBtn.type = 'button';
+    minusBtn.className = 'item-qty-btn';
+    minusBtn.textContent = '－';
+    minusBtn.disabled = qty <= 1;
+    minusBtn.addEventListener('click', () => {
+      redeemQtyByItemId.set(item.id, Math.max(1, qty - 1));
+      renderSiteGroups();
+    });
+    qtyRow.appendChild(minusBtn);
+
+    const qtyValue = document.createElement('span');
+    qtyValue.className = 'item-qty-value';
+    qtyValue.textContent = String(qty);
+    qtyRow.appendChild(qtyValue);
+
+    const plusBtn = document.createElement('button');
+    plusBtn.type = 'button';
+    plusBtn.className = 'item-qty-btn';
+    plusBtn.textContent = '＋';
+    plusBtn.disabled = qty >= maxQty;
+    plusBtn.addEventListener('click', () => {
+      redeemQtyByItemId.set(item.id, Math.min(maxQty, qty + 1));
+      renderSiteGroups();
+    });
+    qtyRow.appendChild(plusBtn);
+
+    action.appendChild(qtyRow);
+  }
+
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'item-redeem-btn';
   btn.classList.toggle('item-redeem-btn-done', limitReached);
-  btn.classList.toggle('item-redeem-btn-insufficient', !limitReached && (!requirementMet || latestUkoPoints < item.cost));
+  btn.classList.toggle('item-redeem-btn-insufficient', !limitReached && (!requirementMet || latestUkoPoints < item.cost * qty));
   btn.textContent = limitReached ? t.redeemedBtn : t.redeemBtn;
-  btn.disabled = latestUkoPoints < item.cost || limitReached || !requirementMet;
-  btn.addEventListener('click', () => handleRedeem(item, siteKey));
+  btn.disabled = latestUkoPoints < item.cost * qty || limitReached || !requirementMet;
+  btn.addEventListener('click', () => handleRedeem(item, siteKey, qty));
   action.appendChild(btn);
+
+  if (isQtyItem && qty > 1) {
+    const totalCost = document.createElement('p');
+    totalCost.className = 'item-qty-total';
+    totalCost.textContent = t.costLabel(item.cost * qty);
+    action.appendChild(totalCost);
+  }
 
   const limit = document.createElement('p');
   limit.className = 'item-limit';
@@ -965,10 +1027,19 @@ function initTabs() {
   });
 }
 
-async function handleRedeem(item, siteKey) {
+// qty(2026-09-20追加): perkType省略(=amount型)のアイテムだけ、-/+で選んだ個数を
+// まとめて1回のトランザクションで交換する。flag/timedBoostはstepper UI自体を
+// 出していないので常に1のまま渡ってくる。
+async function handleRedeem(item, siteKey, qty = 1) {
   const t = s();
   const title = t[item.titleKey];
-  if (!confirm(t.redeemConfirm(title, item.cost))) return;
+  const isQtyItem = item.perkType == null;
+  const effectiveQty = isQtyItem ? Math.max(1, Math.floor(qty)) : 1;
+  const totalCost = item.cost * effectiveQty;
+  const confirmMsg = effectiveQty > 1
+    ? t.redeemConfirmQty(title, effectiveQty, totalCost)
+    : t.redeemConfirm(title, totalCost);
+  if (!confirm(confirmMsg)) return;
 
   const userId = getUserId();
   const ref = doc(db, 'omikujiUsers', userId);
@@ -979,10 +1050,10 @@ async function handleRedeem(item, siteKey) {
       if (!snap.exists()) throw new Error('NO_USER_DOC');
       const data = snap.data();
       const points = data.ukoPoints || 0;
-      if (points < item.cost) throw new Error('INSUFFICIENT_POINTS');
+      if (points < totalCost) throw new Error('INSUFFICIENT_POINTS');
 
       const redeemedCount = data.redemptionCounts?.[item.id] || 0;
-      if (item.maxRedemptions != null && redeemedCount >= item.maxRedemptions) {
+      if (item.maxRedemptions != null && redeemedCount + effectiveQty > item.maxRedemptions) {
         throw new Error('REDEMPTION_LIMIT_REACHED');
       }
 
@@ -994,10 +1065,9 @@ async function handleRedeem(item, siteKey) {
 
       // 永続的に効く特典なので、対象サイト側のフィールドへそのまま加算していく
       // (日付での期限切れは無い)。perkType:'flag'の項目は数値加算ではなく
-      // true を直接立てるだけの一度きりの解放フラグとして扱う。
-      // perkType:'timedBoost'は時限ブースト(SITE_GROUPSの解説コメント参照)。
-      // 既存の期限が未来ならそこからさらにdurationMs延長(スタッキング)、
-      // 切れている/未設定なら「今から」durationMs分の期限にする。
+      // true を直接立てるだけの一度きりの解放フラグとして扱う(qtyは無視)。
+      // perkType:'timedBoost'は時限ブースト(SITE_GROUPSの解説コメント参照、qtyは
+      // 無視しdurationMs分だけ延長)。それ以外(amount型)はamount×effectiveQtyを加算する。
       let perkValue;
       if (item.perkType === 'flag') {
         perkValue = true;
@@ -1006,15 +1076,16 @@ async function handleRedeem(item, siteKey) {
         const baseMs = Math.max(currentExpiryMs, Date.now());
         perkValue = Timestamp.fromMillis(baseMs + item.durationMs);
       } else {
-        perkValue = increment(item.amount);
+        perkValue = increment(item.amount * effectiveQty);
       }
       tx.update(ref, {
-        ukoPoints: increment(-item.cost),
+        ukoPoints: increment(-totalCost),
         [`sitePerks.${siteKey}.${item.perkField}`]: perkValue,
-        [`redemptionCounts.${item.id}`]: increment(1),
+        [`redemptionCounts.${item.id}`]: increment(effectiveQty),
       });
     });
-    showToast(t.redeemSuccess(title), false);
+    redeemQtyByItemId.delete(item.id);
+    showToast(effectiveQty > 1 ? t.redeemSuccessQty(title, effectiveQty) : t.redeemSuccess(title), false);
   } catch (e) {
     if (e.message === 'NO_USER_DOC') {
       showToast(t.redeemNoUserDoc, true);

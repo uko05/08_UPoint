@@ -278,6 +278,42 @@ main {
   gap: 4px;
 }
 
+/* 個数選択(-/+、2026-09-20追加) */
+.item-qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.item-qty-btn {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  width: 26px;
+  height: 26px;
+  line-height: 1;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.item-qty-btn:disabled {
+  color: var(--muted);
+  background: var(--surface2);
+  cursor: default;
+}
+.item-qty-value {
+  min-width: 1.6em;
+  text-align: center;
+  font-weight: bold;
+}
+.item-qty-total {
+  font-size: 0.68rem;
+  color: var(--gold);
+  text-align: center;
+}
+
 .item-limit {
   font-size: 0.68rem;
   color: var(--muted);
