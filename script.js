@@ -84,6 +84,17 @@ const SITE_GROUPS = [
         descKey: 'itemOmikujiListingLikeDesc',
       },
       {
+        // スタレ裏面ガチャ解放(2026-10-09追加)。14_GenshinOmikujiのガチャにスタレ裏面(sr_***)が
+        // 混ざるようになる。一度きり・オフ不可。スタレ裏面はオークションに出品できない。
+        id: 'omikuji_starrail_gacha_unlock',
+        perkField: 'starRailGachaUnlocked',
+        perkType: 'flag',
+        cost: 500,
+        maxRedemptions: 1,
+        titleKey: 'itemOmikujiStarRailTitle',
+        descKey: 'itemOmikujiStarRailDesc',
+      },
+      {
         id: 'omikuji_like_give_boost',
         perkField: 'likeGiveBoostUntil',
         perkType: 'timedBoost',
@@ -472,6 +483,8 @@ const i18n = {
     itemOmikujiGachaTicketDesc: '原神おみくじの裏面デザインガチャを1回引けるガチャ券と交換します(何回でも交換できます)。',
     itemOmikujiListingLikeTitle: 'オークション出品へのいいねを解放',
     itemOmikujiListingLikeDesc: '「みんなの結果」に流れるオークション出品のお知らせにも、通常の結果と同じようにいいねできるようになります(永続的な効果です)。',
+    itemOmikujiStarRailTitle: 'スタレ裏面ガチャ解放',
+    itemOmikujiStarRailDesc: 'おみくじの裏面ガチャに、スタレ裏面(115種)が混ざるようになります。スタレ裏面はオークションに出品できない、自分で引き当てるしかない特別な裏面です。※交換すると原神の裏面が出る確率が少し(約13%)下がります。一度交換するとずっと有効で、オフにはできません。',
     itemOmikujiLikeGiveBoostTitle: 'アゲいいねUPアップ（24時間）',
     itemOmikujiLikeGiveBoostDesc: '交換してから24時間、他の人の結果にいいねした時にもらえるUPが+1されます(通常1UP→2UPに。最大5回まで交換できます)。',
     itemOmikujiLikeReceiveBoostTitle: 'モラいいねUPアップ（24時間）',
@@ -575,6 +588,8 @@ const i18n = {
     itemOmikujiGachaTicketDesc: 'Exchange for one gacha ticket to draw the Genshin Omikuji card-back gacha once (redeemable any number of times).',
     itemOmikujiListingLikeTitle: 'Unlock Auction Listing Likes',
     itemOmikujiListingLikeDesc: 'Lets you like auction listing posts on the "Everyone\'s Results" feed, just like regular results (permanent effect).',
+    itemOmikujiStarRailTitle: 'Unlock Star Rail Card-Back Gacha',
+    itemOmikujiStarRailDesc: 'Adds Star Rail card backs (115 designs) to the omikuji card-back gacha. They cannot be listed on the auction — you can only get them by drawing yourself. Note: Genshin card backs become slightly (about 13%) less likely. This is permanent and cannot be turned off.',
     itemOmikujiLikeGiveBoostTitle: '+1UP per Like Given (24h)',
     itemOmikujiLikeGiveBoostDesc: 'For 24 hours after redeeming, you get +1UP when you like someone else\'s result (normally 1UP → 2UP. Redeemable up to 5 times).',
     itemOmikujiLikeReceiveBoostTitle: '+1UP per Like Received (24h)',
