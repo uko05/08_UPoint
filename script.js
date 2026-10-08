@@ -4,8 +4,9 @@
 
 import { db } from './firebaseConfig.js';
 import {
-  doc, collection, onSnapshot, runTransaction, increment, Timestamp, serverTimestamp,
+  doc, collection, runTransaction, increment, Timestamp, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { onSnapshot } from './fsTracked.js'; // 読み取り件数の集計(調査用、fsTracked.js参照)
 import { ALL_ACHIEVEMENTS as OMIKUJI_ACHIEVEMENTS } from 'https://uko05.github.io/14_GenshinOmikuji/achievements.js';
 
 // ===== ユーザーID(uko05.github.io配下の全サイト共通のlocalStorageキー) =====
