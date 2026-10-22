@@ -4,7 +4,7 @@
 
 import { db } from './firebaseConfig.js';
 import {
-  doc, collection, runTransaction, increment, Timestamp, serverTimestamp,
+  doc, collection, runTransaction, increment, Timestamp, serverTimestamp, getDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { ALL_ACHIEVEMENTS as OMIKUJI_ACHIEVEMENTS } from 'https://uko05.github.io/14_GenshinOmikuji/achievements.js';
@@ -164,6 +164,25 @@ const SITE_GROUPS = [
         maxRedemptions: 10,
         titleKey: 'itemStorageExtraUploadTitle',
         descKey: 'itemStorageExtraUploadDesc',
+      },
+    ],
+  },
+  {
+    // コネクトバトル(2026-10-22追加)。アベンチュリンをキャラとして解放する。
+    // まだ一般には出さない(visibleRoles のロールの人にだけ表示。ロールは sharedUserRoles)
+    siteKey: 'connect',
+    siteNameKey: 'siteConnect',
+    headerBg: '#f3e5f5', // うっすら紫
+    items: [
+      {
+        id: 'connect_aventurine_unlock',
+        perkField: 'aventurineUnlocked',
+        perkType: 'flag',
+        cost: 500,
+        maxRedemptions: 1,
+        visibleRoles: ['admin', 'debugger'],
+        titleKey: 'itemConnectAventurineTitle',
+        descKey: 'itemConnectAventurineDesc',
       },
     ],
   },
@@ -462,6 +481,9 @@ const i18n = {
     conditionOmikujiAllAch: (have, total) => `条件：原神おみくじの実績を全部達成する（現在${have}/${total}）`,
     conditionOmikujiSpecificAch: (name) => `条件：原神おみくじの実績「${name}」を達成する`,
     siteFriendBoard: '＃原神フレンド承認板',
+    siteConnect: '原壊：コネクトバトル',
+    itemConnectAventurineTitle: 'アベンチュリン解放',
+    itemConnectAventurineDesc: 'コネクトバトルでアベンチュリンを使えるようになります(一度きり)。',
     itemFriendBoardChatTitle: 'チャット送信可能数 ＋5',
     itemFriendBoardChatDesc: '友達募集サイトのチャット送信可能数を永続的に+5します(何回でも交換できます)。',
     siteAccountCenter: 'アカウント管理',
@@ -567,6 +589,9 @@ const i18n = {
     conditionOmikujiAllAch: (have, total) => `Requirement: complete all Genshin Omikuji achievements (currently ${have}/${total})`,
     conditionOmikujiSpecificAch: (name) => `Requirement: complete the Genshin Omikuji achievement "${name}"`,
     siteFriendBoard: '#Genshin Friend Approval Board',
+    siteConnect: 'Genshin x Star Rail: Connect Battle',
+    itemConnectAventurineTitle: 'Unlock Aventurine',
+    itemConnectAventurineDesc: 'Lets you play as Aventurine in Connect Battle (one time).',
     itemFriendBoardChatTitle: 'Chat message limit +5',
     itemFriendBoardChatDesc: "Permanently adds +5 to the friend board's chat message limit (can be redeemed any number of times).",
     siteAccountCenter: 'Account Center',
@@ -842,6 +867,15 @@ function buildItemCard(item, siteKey) {
   return card;
 }
 
+// まだ一般に出さない項目(visibleRoles)の表示判定用ロール(sharedUserRoles。admin / debugger / general)
+let myRole = 'general';
+getDoc(doc(db, 'sharedUserRoles', getUserId())).then((snap) => {
+  const d = snap.exists() ? snap.data() : {};
+  myRole = d.role || (d.debugConnect ? 'debugger' : 'general');
+  if (myRole !== 'general') renderSiteGroups();
+}).catch((e) => console.error('[upoint] role load failed', e));
+const isItemVisible = (item) => !item.visibleRoles || item.visibleRoles.includes(myRole);
+
 function renderSiteGroups() {
   const list = document.getElementById('site-group-list');
   if (!list) return;
@@ -849,6 +883,8 @@ function renderSiteGroups() {
   list.innerHTML = '';
 
   SITE_GROUPS.forEach((group) => {
+    const visibleItems = group.items.filter(isItemVisible);
+    if (!visibleItems.length) return;
     const details = document.createElement('details');
     details.className = 'site-group';
     details.open = openGroups.has(group.siteKey);
@@ -865,7 +901,7 @@ function renderSiteGroups() {
 
     const itemsDiv = document.createElement('div');
     itemsDiv.className = 'site-group-items';
-    group.items.forEach((item) => itemsDiv.appendChild(buildItemCard(item, group.siteKey)));
+    visibleItems.forEach((item) => itemsDiv.appendChild(buildItemCard(item, group.siteKey)));
     details.appendChild(itemsDiv);
 
     list.appendChild(details);
