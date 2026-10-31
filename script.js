@@ -95,13 +95,13 @@ const SITE_GROUPS = [
         descKey: 'itemOmikujiStarRailDesc',
       },
       {
-        // 新着裏面の帯(2026-10-31追加)。おみくじの「みんなの結果」の上に、最近追加された裏面の
-        // サムネと追加日が流れるようになる(14_GenshinOmikuji/newBacks.js)。見た目の調整中のため
-        // 今は管理者にだけ表示。値段は仮。
+        // 新着裏面の帯(2026-10-31追加)。おみくじの「みんなの結果」の上に、直近30日に追加された裏面の
+        // サムネと追加日が横スクロールの1列で並ぶ(14_GenshinOmikuji/newBacks.js)。見た目の調整中のため
+        // 今は管理者にだけ表示。
         id: 'omikuji_new_backs_ticker',
         perkField: 'newBacksTickerUnlocked',
         perkType: 'flag',
-        cost: 100,
+        cost: 300,
         maxRedemptions: 1,
         visibleRoles: ['admin'],
         titleKey: 'itemOmikujiNewBacksTitle',
@@ -519,7 +519,7 @@ const i18n = {
     itemOmikujiListingLikeTitle: 'オークション出品へのいいねを解放',
     itemOmikujiListingLikeDesc: '「みんなの結果」に流れるオークション出品のお知らせにも、通常の結果と同じようにいいねできるようになります(永続的な効果です)。',
     itemOmikujiNewBacksTitle: '新着裏面の帯',
-    itemOmikujiNewBacksDesc: 'おみくじの「みんなの結果」の上に、新しく追加された裏面デザイン(最新5件)のサムネと追加日が流れるようになります。新しい裏面が増えたらすぐ分かります(一度きり)。',
+    itemOmikujiNewBacksDesc: 'おみくじの「みんなの結果」の上に、直近30日に追加された裏面デザインが追加日つきで並ぶようになります。新しい裏面が増えたらすぐ分かります(一度きり)。',
     itemOmikujiStarRailTitle: 'スタレ裏面ガチャ解放',
     itemOmikujiStarRailDesc: 'おみくじの裏面ガチャに、スタレ裏面(115種)が混ざるようになります。スタレ裏面はオークションに出品できない、自分で引き当てるしかない特別な裏面です。※交換すると原神の裏面が出る確率が少し(約10%)下がります。一度交換するとずっと有効で、オフにはできません。',
     itemOmikujiLikeGiveBoostTitle: 'アゲいいねUPアップ（24時間）',
@@ -629,7 +629,7 @@ const i18n = {
     itemOmikujiListingLikeTitle: 'Unlock Auction Listing Likes',
     itemOmikujiListingLikeDesc: 'Lets you like auction listing posts on the "Everyone\'s Results" feed, just like regular results (permanent effect).',
     itemOmikujiNewBacksTitle: 'New Card Backs Ticker',
-    itemOmikujiNewBacksDesc: 'Shows the 5 newest card-back designs and the date they were added, scrolling above "Everyone’s Results" on the omikuji site (one time).',
+    itemOmikujiNewBacksDesc: 'Shows the card-back designs added in the last 30 days, with the date each was added, above "Everyone’s Results" on the omikuji site (one time).',
     itemOmikujiStarRailTitle: 'Unlock Star Rail Card-Back Gacha',
     itemOmikujiStarRailDesc: 'Adds Star Rail card backs (115 designs) to the omikuji card-back gacha. They cannot be listed on the auction — you can only get them by drawing yourself. Note: Genshin card backs become slightly (about 10%) less likely. This is permanent and cannot be turned off.',
     itemOmikujiLikeGiveBoostTitle: '+1UP per Like Given (24h)',
