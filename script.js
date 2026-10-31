@@ -1207,7 +1207,7 @@ async function handleRedeem(item, siteKey, qty = 1) {
       if (item.logType) {
         tx.set(doc(collection(db, 'ukoPointsLog')), {
           userId, amount: -totalCost, type: item.logType,
-          meta: { itemId: item.id, itemName: s()[item.titleKey] || item.id, qty: effectiveQty },
+          meta: { itemId: item.id, itemName: s()[item.titleKey] || item.id, qty: effectiveQty, userName: data.name || '' },
           createdAt: serverTimestamp(),
         });
       }
