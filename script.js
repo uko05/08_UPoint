@@ -96,14 +96,13 @@ const SITE_GROUPS = [
       },
       {
         // 新着裏面の帯(2026-10-31追加)。おみくじの「みんなの結果」の上に、直近30日に追加された裏面の
-        // サムネと追加日が横スクロールの1列で並ぶ(14_GenshinOmikuji/newBacks.js)。見た目の調整中のため
-        // 今は管理者にだけ表示。
+        // サムネと追加日が横スクロールの1列で並ぶ(14_GenshinOmikuji/newBacks.js)。
+        // 2026-10-31に一般公開。
         id: 'omikuji_new_backs_ticker',
         perkField: 'newBacksTickerUnlocked',
         perkType: 'flag',
         cost: 300,
         maxRedemptions: 1,
-        visibleRoles: ['admin'],
         titleKey: 'itemOmikujiNewBacksTitle',
         descKey: 'itemOmikujiNewBacksDesc',
       },
