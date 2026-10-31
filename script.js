@@ -110,14 +110,13 @@ const SITE_GROUPS = [
         // 願いの結晶(2026-11-01追加)。おみくじの裏面図鑑で、好きな裏面デザインを1枚手に入れられる
         // (14_GenshinOmikuji/wishCrystal.js。持っている裏面も可・スタレ裏面は不可・その1枚は出品不可)。
         // monthlyLimit: 毎月1日(日本時間)に復活する、1か月あたりの交換回数の上限。
-        // まだ試験中なので管理者にだけ表示。
+        // 2026-11-01に一般公開(3000UP→1500UP)。
         id: 'omikuji_wish_crystal',
         perkField: 'wishCrystals',
         amount: 1,
-        cost: 3000,
+        cost: 1500,
         maxRedemptions: null,
         monthlyLimit: 1,
-        visibleRoles: ['admin'],
         titleKey: 'itemOmikujiWishCrystalTitle',
         descKey: 'itemOmikujiWishCrystalDesc',
       },
