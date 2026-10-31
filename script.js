@@ -117,6 +117,7 @@ const SITE_GROUPS = [
         cost: 1500,
         maxRedemptions: null,
         monthlyLimit: 1,
+        logType: 'wishCrystalBuy', // 交換したことを ukoPointsLog に残す(管理画面の「願いの結晶の履歴」用)
         titleKey: 'itemOmikujiWishCrystalTitle',
         descKey: 'itemOmikujiWishCrystalDesc',
       },
@@ -1202,6 +1203,14 @@ async function handleRedeem(item, siteKey, qty = 1) {
           ? { [`monthlyRedemptions.${item.id}`]: { month, count: monthlyUsedNow + effectiveQty } }
           : {}),
       });
+      // logType のあるアイテムだけ、交換したことを記録する(UPは減るので金額はマイナス)
+      if (item.logType) {
+        tx.set(doc(collection(db, 'ukoPointsLog')), {
+          userId, amount: -totalCost, type: item.logType,
+          meta: { itemId: item.id, itemName: s()[item.titleKey] || item.id, qty: effectiveQty },
+          createdAt: serverTimestamp(),
+        });
+      }
     });
     redeemQtyByItemId.delete(item.id);
     showToast(effectiveQty > 1 ? t.redeemSuccessQty(title, effectiveQty) : t.redeemSuccess(title), false);
