@@ -107,6 +107,21 @@ const SITE_GROUPS = [
         descKey: 'itemOmikujiNewBacksDesc',
       },
       {
+        // 願いの結晶(2026-11-01追加)。おみくじの裏面図鑑で、好きな裏面デザインを1枚手に入れられる
+        // (14_GenshinOmikuji/wishCrystal.js。持っている裏面も可・スタレ裏面は不可・その1枚は出品不可)。
+        // monthlyLimit: 毎月1日(日本時間)に復活する、1か月あたりの交換回数の上限。
+        // まだ試験中なので管理者にだけ表示。
+        id: 'omikuji_wish_crystal',
+        perkField: 'wishCrystals',
+        amount: 1,
+        cost: 3000,
+        maxRedemptions: null,
+        monthlyLimit: 1,
+        visibleRoles: ['admin'],
+        titleKey: 'itemOmikujiWishCrystalTitle',
+        descKey: 'itemOmikujiWishCrystalDesc',
+      },
+      {
         id: 'omikuji_like_give_boost',
         perkField: 'likeGiveBoostUntil',
         perkType: 'timedBoost',
@@ -490,6 +505,9 @@ const i18n = {
     limitNone: '交換上限：なし',
     limitRemaining: (max, remaining) => `交換上限：\n${max}回（あと${remaining}回）`,
     limitReached: '交換上限に\n達しました',
+    limitMonthly: (max, remaining) => `交換上限：\n毎月${max}回（今月あと${remaining}回）`,
+    limitMonthlyReached: '今月の交換上限に\n達しました（毎月1日に復活）',
+    redeemMonthlyLimitReached: '今月はもう交換できません（毎月1日に復活します）。',
     conditionOmikujiAllAch: (have, total) => `条件：原神おみくじの実績を全部達成する（現在${have}/${total}）`,
     conditionOmikujiSpecificAch: (name) => `条件：原神おみくじの実績「${name}」を達成する`,
     siteFriendBoard: '＃原神フレンド承認板',
@@ -517,6 +535,8 @@ const i18n = {
     itemOmikujiGachaTicketDesc: '原神おみくじの裏面デザインガチャを1回引けるガチャ券と交換します(何回でも交換できます)。',
     itemOmikujiListingLikeTitle: 'オークション出品へのいいねを解放',
     itemOmikujiListingLikeDesc: '「みんなの結果」に流れるオークション出品のお知らせにも、通常の結果と同じようにいいねできるようになります(永続的な効果です)。',
+    itemOmikujiWishCrystalTitle: '願いの結晶',
+    itemOmikujiWishCrystalDesc: 'おみくじの裏面図鑑で、好きな裏面デザインを1枚手に入れられる結晶です。持っている裏面も選べます(スタレ裏面は対象外)。結晶で手に入れた裏面はオークションに出品できません(ダブりの一括売却はできます)。',
     itemOmikujiNewBacksTitle: '新着裏面の帯',
     itemOmikujiNewBacksDesc: 'おみくじの「みんなの結果」の上に、直近30日に追加された裏面デザインが追加日つきで並ぶようになります。新しい裏面が増えたらすぐ分かります(一度きり)。',
     itemOmikujiStarRailTitle: 'スタレ裏面ガチャ解放',
@@ -600,6 +620,9 @@ const i18n = {
     limitNone: 'Redemption limit: none',
     limitRemaining: (max, remaining) => `Redemption limit: ${max} (${remaining} left)`,
     limitReached: 'Redemption limit reached',
+    limitMonthly: (max, remaining) => `Limit: ${max} per month (${remaining} left this month)`,
+    limitMonthlyReached: 'Monthly limit reached (resets on the 1st)',
+    redeemMonthlyLimitReached: "You can't redeem this again this month (resets on the 1st).",
     conditionOmikujiAllAch: (have, total) => `Requirement: complete all Genshin Omikuji achievements (currently ${have}/${total})`,
     conditionOmikujiSpecificAch: (name) => `Requirement: complete the Genshin Omikuji achievement "${name}"`,
     siteFriendBoard: '#Genshin Friend Approval Board',
@@ -627,6 +650,8 @@ const i18n = {
     itemOmikujiGachaTicketDesc: 'Exchange for one gacha ticket to draw the Genshin Omikuji card-back gacha once (redeemable any number of times).',
     itemOmikujiListingLikeTitle: 'Unlock Auction Listing Likes',
     itemOmikujiListingLikeDesc: 'Lets you like auction listing posts on the "Everyone\'s Results" feed, just like regular results (permanent effect).',
+    itemOmikujiWishCrystalTitle: 'Wish Crystal',
+    itemOmikujiWishCrystalDesc: 'Lets you get one card-back design of your choice from the omikuji card-back collection, even one you already own (Star Rail backs excluded). Card backs obtained this way cannot be listed on the auction (they can still be bulk-sold as duplicates).',
     itemOmikujiNewBacksTitle: 'New Card Backs Ticker',
     itemOmikujiNewBacksDesc: 'Shows the card-back designs added in the last 30 days, with the date each was added, above "Everyone’s Results" on the omikuji site (one time).',
     itemOmikujiStarRailTitle: 'Unlock Star Rail Card-Back Gacha',
@@ -709,6 +734,16 @@ function initLangSwitch() {
 // ===== 所持UPのリアルタイム表示 =====
 let latestUkoPoints = 0;
 let latestRedemptionCounts = {};
+// 毎月の交換回数(monthlyLimit のあるアイテム用、2026-11-01追加)。{ itemId: { month: '2026-11', count: 1 } }
+let latestMonthlyRedemptions = {};
+// 日本時間の年月('2026-11')。毎月1日の0時(日本時間)に切り替わる
+function jstMonth() {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 7);
+}
+function monthlyUsedFrom(map, itemId) {
+  const m = map?.[itemId];
+  return m && m.month === jstMonth() ? (m.count || 0) : 0;
+}
 // perkTypeが省略(=数値加算/amount)のアイテムだけ、-/+で個数を選んでまとめて交換できる
 // (2026-09-20追加。ガチャ券を1枚ずつしか交換できないのが手間、という要望から)。
 // item.idごとに選択中の個数を保持する(既定1、残高やmaxRedemptionsが変わるたびに
@@ -748,6 +783,7 @@ function startBalanceListener() {
     const data = snap.exists() ? snap.data() : {};
     latestUkoPoints = data.ukoPoints || 0;
     latestRedemptionCounts = data.redemptionCounts || {};
+    latestMonthlyRedemptions = data.monthlyRedemptions || {};
     latestOmikujiAchievements = data.achievements || [];
     latestMissionStats = {
       totalLikesGiven: data.totalLikesGiven || 0,
@@ -768,7 +804,9 @@ function buildItemCard(item, siteKey) {
   card.className = 'item-card';
 
   const redeemedCount = latestRedemptionCounts[item.id] || 0;
-  const limitReached = item.maxRedemptions != null && redeemedCount >= item.maxRedemptions;
+  const monthlyUsed = monthlyUsedFrom(latestMonthlyRedemptions, item.id);
+  const monthlyReached = item.monthlyLimit != null && monthlyUsed >= item.monthlyLimit;
+  const limitReached = (item.maxRedemptions != null && redeemedCount >= item.maxRedemptions) || monthlyReached;
   const requirementMet = !item.requiresAllOmikujiAchievements || hasAllOmikujiAchievements();
 
   const cost = document.createElement('span');
@@ -812,7 +850,8 @@ function buildItemCard(item, siteKey) {
   let qty = 1;
   if (isQtyItem) {
     const maxByBalance = Math.floor(latestUkoPoints / item.cost);
-    const maxByLimit = item.maxRedemptions != null ? Math.max(0, item.maxRedemptions - redeemedCount) : Infinity;
+    let maxByLimit = item.maxRedemptions != null ? Math.max(0, item.maxRedemptions - redeemedCount) : Infinity;
+    if (item.monthlyLimit != null) maxByLimit = Math.min(maxByLimit, Math.max(0, item.monthlyLimit - monthlyUsed));
     const maxQty = Math.max(0, Math.min(maxByBalance, maxByLimit));
     qty = Math.min(Math.max(redeemQtyByItemId.get(item.id) ?? 1, 1), Math.max(maxQty, 1));
     redeemQtyByItemId.set(item.id, qty);
@@ -869,8 +908,12 @@ function buildItemCard(item, siteKey) {
 
   const limit = document.createElement('p');
   limit.className = 'item-limit';
-  if (limitReached) {
+  if (monthlyReached) {
+    limit.textContent = t.limitMonthlyReached;
+  } else if (limitReached) {
     limit.textContent = t.limitReached;
+  } else if (item.monthlyLimit != null) {
+    limit.textContent = t.limitMonthly(item.monthlyLimit, item.monthlyLimit - monthlyUsed);
   } else if (item.maxRedemptions == null) {
     limit.textContent = t.limitNone;
   } else {
@@ -1124,6 +1167,12 @@ async function handleRedeem(item, siteKey, qty = 1) {
       if (item.maxRedemptions != null && redeemedCount + effectiveQty > item.maxRedemptions) {
         throw new Error('REDEMPTION_LIMIT_REACHED');
       }
+      // 毎月の上限(monthlyLimit)。月が変わっていれば0回から数え直す
+      const month = jstMonth();
+      const monthlyUsedNow = monthlyUsedFrom(data.monthlyRedemptions, item.id);
+      if (item.monthlyLimit != null && monthlyUsedNow + effectiveQty > item.monthlyLimit) {
+        throw new Error('MONTHLY_LIMIT_REACHED');
+      }
 
       if (item.requiresAllOmikujiAchievements) {
         const myAchievements = data.achievements || [];
@@ -1150,6 +1199,9 @@ async function handleRedeem(item, siteKey, qty = 1) {
         ukoPoints: increment(-totalCost),
         [`sitePerks.${siteKey}.${item.perkField}`]: perkValue,
         [`redemptionCounts.${item.id}`]: increment(effectiveQty),
+        ...(item.monthlyLimit != null
+          ? { [`monthlyRedemptions.${item.id}`]: { month, count: monthlyUsedNow + effectiveQty } }
+          : {}),
       });
     });
     redeemQtyByItemId.delete(item.id);
@@ -1161,6 +1213,8 @@ async function handleRedeem(item, siteKey, qty = 1) {
       showToast(t.redeemInsufficientPoints, true);
     } else if (e.message === 'REDEMPTION_LIMIT_REACHED') {
       showToast(t.redeemLimitReached, true);
+    } else if (e.message === 'MONTHLY_LIMIT_REACHED') {
+      showToast(t.redeemMonthlyLimitReached, true);
     } else if (e.message === 'REQUIREMENT_NOT_MET') {
       showToast(t.redeemRequirementNotMet, true);
     } else {
