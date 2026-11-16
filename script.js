@@ -1264,7 +1264,9 @@ const LOT = {
   ja: {
     when: (d) => `${d} 21:00 締め切り・22:00 結果発表（結果はおみくじの「宝くじ」タブ）`,
     pool: '賞金の合計', first: '1等の賞金', tickets: '全体の口数', people: '参加者',
-    note: '（開いた時点の数字です）', mine: 'あなたの口数', chance: '1等に当たる確率の目安',
+    note: '（開いた時点の数字です）',
+    carriedIn: '前の回からの持ち越し（口数・賞金）を含みます',
+    minPeople: '参加者が8人以下の回は抽選せず、口数と賞金をそのまま次の回へ持ち越します。', mine: 'あなたの口数', chance: '1等に当たる確率の目安',
     prizes: '1等 1人：賞金の60%＋願いの結晶2個 ／ 2等 2人：15%ずつ＋結晶1個 ／ 3等 5人：2%ずつ。当たるのは1人1つまで。',
     rule: `1口${LOTTERY_PRICE}UP（${LOTTERY_POOL_PER}UPが賞金に）。1人${LOTTERY_CAP}口まで、何回でも分けて買えます。`,
     buy: (n) => `${n}口買う（${n * LOTTERY_PRICE}UP）`, closed: '販売は締め切りました。結果発表をお待ちください。',
@@ -1279,7 +1281,9 @@ const LOT = {
   en: {
     when: (d) => `Sales close ${d} 21:00 JST, results at 22:00 (see the Lottery tab on Omikuji)`,
     pool: 'Total prize', first: '1st prize', tickets: 'Tickets sold', people: 'Players',
-    note: '(as of when you opened this tab)', mine: 'Your tickets', chance: 'Chance of 1st prize',
+    note: '(as of when you opened this tab)',
+    carriedIn: 'Includes tickets and prize carried over from the previous round',
+    minPeople: 'If 8 or fewer people join, the draw is carried over to the next round with all tickets and the prize.', mine: 'Your tickets', chance: 'Chance of 1st prize',
     prizes: '1st (1): 60% + 2 Wish Crystals / 2nd (2): 15% each + 1 crystal / 3rd (5): 2% each. One prize per person.',
     rule: `${LOTTERY_PRICE} UP per ticket (${LOTTERY_POOL_PER} UP goes to the prize). Up to ${LOTTERY_CAP} tickets per person.`,
     buy: (n) => `Buy ${n} (${n * LOTTERY_PRICE} UP)`, closed: 'Sales are closed. Please wait for the results.',
@@ -1372,6 +1376,7 @@ function renderLottery() {
       <p class="lottery-mine">${t.chance}: <b>${chance}</b></p>
       <p class="lottery-rule">${t.rule}</p>
       <p class="lottery-rule">${t.prizes}</p>
+      <p class="lottery-rule">${t.minPeople}</p>
       ${open ? `<div class="lottery-buy">
         <div class="lottery-steps">
           <button type="button" class="lottery-step" data-d="-10">−10</button>
@@ -1397,6 +1402,7 @@ function renderLottery() {
       <div><small>${t.tickets}</small><b>${total.toLocaleString()}</b></div>
       <div><small>${t.people}</small><b>${people.toLocaleString()}</b></div>
     </div>
+    ${d.carriedFrom ? `<p class="lottery-muted">${t.carriedIn}</p>` : ''}
     <p class="lottery-muted">${t.note}</p>`;
   box.querySelectorAll('.lottery-step').forEach((b) => b.addEventListener('click', () => {
     lotteryState.qty = Math.min(Math.max(1, lotteryState.qty + Number(b.dataset.d)), Math.max(1, maxQty));
