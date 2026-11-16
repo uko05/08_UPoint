@@ -7,6 +7,7 @@ import {
   doc, collection, runTransaction, increment, Timestamp, serverTimestamp, getDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { query, where, getAggregateFromServer, sum, count } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { ALL_ACHIEVEMENTS as OMIKUJI_ACHIEVEMENTS } from 'https://uko05.github.io/14_GenshinOmikuji/achievements.js';
 
 // ===== ユーザーID(uko05.github.io配下の全サイト共通のlocalStorageキー) =====
@@ -1263,7 +1264,7 @@ const LOT = {
   ja: {
     when: (d) => `${d} 21:00 締め切り・22:00 結果発表（結果はおみくじの「宝くじ」タブ）`,
     pool: '賞金の合計', first: '1等の賞金', tickets: '全体の口数', people: '参加者',
-    note: '（1時間ごとに更新）', mine: 'あなたの口数', chance: '1等に当たる確率の目安',
+    note: '（開いた時点の数字です）', mine: 'あなたの口数', chance: '1等に当たる確率の目安',
     prizes: '1等 1人：賞金の60%＋願いの結晶2個 ／ 2等 2人：15%ずつ＋結晶1個 ／ 3等 5人：2%ずつ。当たるのは1人1つまで。',
     rule: `1口${LOTTERY_PRICE}UP（${LOTTERY_POOL_PER}UPが賞金に）。1人${LOTTERY_CAP}口まで、何回でも分けて買えます。`,
     buy: (n) => `${n}口買う（${n * LOTTERY_PRICE}UP）`, closed: '販売は締め切りました。結果発表をお待ちください。',
@@ -1278,7 +1279,7 @@ const LOT = {
   en: {
     when: (d) => `Sales close ${d} 21:00 JST, results at 22:00 (see the Lottery tab on Omikuji)`,
     pool: 'Total prize', first: '1st prize', tickets: 'Tickets sold', people: 'Players',
-    note: '(updated hourly)', mine: 'Your tickets', chance: 'Chance of 1st prize',
+    note: '(as of when you opened this tab)', mine: 'Your tickets', chance: 'Chance of 1st prize',
     prizes: '1st (1): 60% + 2 Wish Crystals / 2nd (2): 15% each + 1 crystal / 3rd (5): 2% each. One prize per person.',
     rule: `${LOTTERY_PRICE} UP per ticket (${LOTTERY_POOL_PER} UP goes to the prize). Up to ${LOTTERY_CAP} tickets per person.`,
     buy: (n) => `Buy ${n} (${n * LOTTERY_PRICE} UP)`, closed: 'Sales are closed. Please wait for the results.',
@@ -1308,7 +1309,20 @@ function lotteryCurrentDraw(nowMs = Date.now()) {
   return null;
 }
 
-const lotteryState = { draw: null, mine: 0, qty: 10, busy: false };
+const lotteryState = { draw: null, mine: 0, qty: 10, busy: false, live: null };
+
+// 今の口数と参加者を、その場で数える(合計を数える集計なので、読み取りは参加者1,000人ごとに1回分)。
+// 1時間ごとの集計(ukoLottery の totalTickets)を待たずに、開いた時点・買った直後の数字を出すため(2026-11-17)
+async function lotteryLiveCount(drawId) {
+  try {
+    const snap = await getAggregateFromServer(query(collection(db, 'ukoLotteryEntries'), where('drawId', '==', drawId)),
+      { total: sum('count'), n: count() });
+    return { total: snap.data().total || 0, n: snap.data().n || 0 };
+  } catch (e) {
+    console.error('[upoint] lottery count failed', e);
+    return null;
+  }
+}
 
 async function loadLottery() {
   const box = document.getElementById('lottery-panel');
@@ -1316,10 +1330,12 @@ async function loadLottery() {
   const cd = lotteryCurrentDraw();
   box.innerHTML = `<p class="lottery-muted">${lt().loading}</p>`;
   try {
-    const [ds, es] = await Promise.all([
+    const [ds, es, live] = await Promise.all([
       getDoc(doc(db, 'ukoLottery', cd.drawId)),
       getDoc(doc(db, 'ukoLotteryEntries', `${cd.drawId}_${getUserId()}`)),
+      lotteryLiveCount(cd.drawId),
     ]);
+    lotteryState.live = live;
     lotteryState.draw = ds.exists() ? { id: ds.id, ...ds.data() } : null;
     lotteryState.mine = es.exists() ? (es.data().count || 0) : 0;
   } catch (e) {
@@ -1335,8 +1351,11 @@ function renderLottery() {
   const d = lotteryState.draw;
   const cd = lotteryCurrentDraw();
   if (!d) { box.innerHTML = `<p class="lottery-muted">${t.noDraw}</p>`; return; }
-  const total = Math.max(d.totalTickets || 0, lotteryState.mine);
-  const pool = d.pool || 0;
+  // 受付中はその場で数えた口数から賞金を出す(数えられなかった時は1時間ごとの集計の値)
+  const live = d.status === 'open' ? lotteryState.live : null;
+  const total = Math.max(live ? live.total : (d.totalTickets || 0), lotteryState.mine);
+  const people = live ? live.n : (d.participants || 0);
+  const pool = d.status === 'open' ? (d.seed || 3000) + LOTTERY_POOL_PER * total : (d.pool || 0);
   const open = d.status === 'open' && Date.now() < (d.closeAt?.toMillis?.() || 0);
   const left = Math.max(0, LOTTERY_CAP - lotteryState.mine);
   const afford = Math.floor((latestUkoPoints || 0) / LOTTERY_PRICE);
@@ -1376,7 +1395,7 @@ function renderLottery() {
     <div class="lottery-stats">
       <div><small>${t.pool}</small><b>${pool.toLocaleString()}<span>UP</span></b></div>
       <div><small>${t.tickets}</small><b>${total.toLocaleString()}</b></div>
-      <div><small>${t.people}</small><b>${(d.participants || 0).toLocaleString()}</b></div>
+      <div><small>${t.people}</small><b>${people.toLocaleString()}</b></div>
     </div>
     <p class="lottery-muted">${t.note}</p>`;
   box.querySelectorAll('.lottery-step').forEach((b) => b.addEventListener('click', () => {
@@ -1421,6 +1440,7 @@ async function buyLottery(qty) {
       });
     });
     lotteryState.mine = newTotal;
+    lotteryState.live = await lotteryLiveCount(d.id) || lotteryState.live;
     showToast(t.done(qty, newTotal));
   } catch (e) {
     const map = { POINTS: t.errPoints, CAP: t.errCap, CLOSED: t.errClosed, COND: t.errCond, ADMIN: t.errAdmin };
