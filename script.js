@@ -481,6 +481,8 @@ const i18n = {
     itemsTitle: '交換できる特典',
     tabExchange: '交換',
     tabMissions: 'ミッション',
+    tabLottery: '宝くじ',
+    lotteryTitle: 'UP宝くじ',
     missionsTitle: 'UPを貯める方法',
     missionRewardLabel: (n) => `+${n}UP`,
     missionUnlimitedLabel: '無制限',
@@ -596,6 +598,8 @@ const i18n = {
     itemsTitle: 'Available Perks',
     tabExchange: 'Exchange',
     tabMissions: 'Missions',
+    tabLottery: 'Lottery',
+    lotteryTitle: 'UP Lottery',
     missionsTitle: 'Ways to Earn UP',
     missionRewardLabel: (n) => `+${n}UP`,
     missionUnlimitedLabel: 'Unlimited',
@@ -932,6 +936,8 @@ getDoc(doc(db, 'sharedUserRoles', getUserId())).then((snap) => {
   const d = snap.exists() ? snap.data() : {};
   myRole = d.role || (d.debugConnect ? 'debugger' : 'general');
   if (myRole !== 'general') renderSiteGroups();
+  const lb = document.getElementById('tab-btn-lottery');
+  if (lb) lb.hidden = !isLotteryVisible();
 }).catch((e) => console.error('[upoint] role load failed', e));
 const isItemVisible = (item) => !item.visibleRoles || item.visibleRoles.includes(myRole);
 
@@ -1134,6 +1140,8 @@ function initTabs() {
       buttons.forEach((b) => b.classList.toggle('active', b === btn));
       document.getElementById('tab-panel-exchange').hidden = tab !== 'exchange';
       document.getElementById('tab-panel-missions').hidden = tab !== 'missions';
+      document.getElementById('tab-panel-lottery').hidden = tab !== 'lottery';
+      if (tab === 'lottery') loadLottery();
     });
   });
 }
@@ -1242,6 +1250,166 @@ function showToast(text, isError) {
   el.style.display = 'block';
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3200);
+}
+
+// ===== UP宝くじ(2026-11-17。サーバー側は 24_AccountCenter/functions/lottery.js) =====
+// 1口10UP(8UPが賞金に)・1人1回200口まで・何回でも分けて買える。抽選は毎月1日と16日、21時締め切り・22時発表。
+// 結果は 14_GenshinOmikuji のフィードの「宝くじ」タブで見る。
+// 読み取りはタブを開いた時だけ(回のドキュメント1件+自分の口数1件)。
+const LOTTERY_PUBLIC = false;        // false の間は管理者だけに見える(試しの期間)。公開する時に true にする
+const LOTTERY_PRICE = 10, LOTTERY_POOL_PER = 8, LOTTERY_CAP = 200, LOTTERY_MIN_DRAWS = 5;
+const isLotteryVisible = () => LOTTERY_PUBLIC || myRole === 'admin';
+const LOT = {
+  ja: {
+    when: (d) => `${d} 21:00 締め切り・22:00 結果発表（結果はおみくじの「宝くじ」タブ）`,
+    pool: '賞金の合計', first: '1等の賞金', tickets: '全体の口数', people: '参加者',
+    note: '（1時間ごとに更新）', mine: 'あなたの口数', chance: '1等に当たる確率の目安',
+    prizes: '1等 1人：賞金の60%＋願いの結晶2個 ／ 2等 2人：15%ずつ＋結晶1個 ／ 3等 5人：2%ずつ。当たるのは1人1つまで。',
+    rule: `1口${LOTTERY_PRICE}UP（${LOTTERY_POOL_PER}UPが賞金に）。1人${LOTTERY_CAP}口まで、何回でも分けて買えます。`,
+    buy: (n) => `${n}口買う（${n * LOTTERY_PRICE}UP）`, closed: '販売は締め切りました。結果発表をお待ちください。',
+    confirm: (n) => `UP宝くじを${n}口（${n * LOTTERY_PRICE}UP）買いますか？\n買ったあとの払い戻しはできません。`,
+    done: (n, total) => `${n}口買いました（この回の合計 ${total}口）`,
+    errPoints: 'UPが足りません', errCap: `1人${LOTTERY_CAP}口までです`, errClosed: '販売は締め切りました',
+    errCond: `おみくじを${LOTTERY_MIN_DRAWS}回以上引くと買えるようになります`, errAdmin: '管理者は買えません', errFail: '買えませんでした。もう一度お試しください',
+    loading: '読み込み中…', noDraw: '次の回の準備中です。少し待ってから開き直してください。', test: '試しの期間（管理者だけに表示中）',
+  },
+  en: {
+    when: (d) => `Sales close ${d} 21:00 JST, results at 22:00 (see the Lottery tab on Omikuji)`,
+    pool: 'Total prize', first: '1st prize', tickets: 'Tickets sold', people: 'Players',
+    note: '(updated hourly)', mine: 'Your tickets', chance: 'Chance of 1st prize',
+    prizes: '1st (1): 60% + 2 Wish Crystals / 2nd (2): 15% each + 1 crystal / 3rd (5): 2% each. One prize per person.',
+    rule: `${LOTTERY_PRICE} UP per ticket (${LOTTERY_POOL_PER} UP goes to the prize). Up to ${LOTTERY_CAP} tickets per person.`,
+    buy: (n) => `Buy ${n} (${n * LOTTERY_PRICE} UP)`, closed: 'Sales are closed. Please wait for the results.',
+    confirm: (n) => `Buy ${n} UP Lottery ticket(s) for ${n * LOTTERY_PRICE} UP?\nNo refunds.`,
+    done: (n, total) => `Bought ${n} ticket(s) (total ${total} this round)`,
+    errPoints: 'Not enough UP', errCap: `Up to ${LOTTERY_CAP} tickets per person`, errClosed: 'Sales are closed',
+    errCond: `Draw Omikuji ${LOTTERY_MIN_DRAWS} times to unlock`, errAdmin: 'Admins cannot buy', errFail: 'Purchase failed. Please try again',
+    loading: 'Loading…', noDraw: 'The next round is being prepared. Please reopen in a little while.', test: 'Test period (visible to admins only)',
+  },
+};
+const lt = () => LOT[currentLang()] || LOT.ja;
+
+// サーバー(lottery.js)と同じ決め方: 結果発表(22時)がまだ来ていない一番近い1日か16日
+function lotteryCurrentDraw(nowMs = Date.now()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  const j = new Date(nowMs + 9 * 3600e3);
+  let y = j.getUTCFullYear(), m = j.getUTCMonth() + 1;
+  for (let k = 0; k < 3; k++) {
+    for (const day of [1, 16]) {
+      const res = Date.UTC(y, m - 1, day, 22 - 9);
+      if (res > nowMs) return { drawId: `${y}-${pad(m)}-${pad(day)}`, label: `${m}/${day}` };
+    }
+    m += 1; if (m > 12) { m = 1; y += 1; }
+  }
+  return null;
+}
+
+const lotteryState = { draw: null, mine: 0, qty: 10, busy: false };
+
+async function loadLottery() {
+  const box = document.getElementById('lottery-panel');
+  if (!box || !isLotteryVisible()) return;
+  const cd = lotteryCurrentDraw();
+  box.innerHTML = `<p class="lottery-muted">${lt().loading}</p>`;
+  try {
+    const [ds, es] = await Promise.all([
+      getDoc(doc(db, 'ukoLottery', cd.drawId)),
+      getDoc(doc(db, 'ukoLotteryEntries', `${cd.drawId}_${getUserId()}`)),
+    ]);
+    lotteryState.draw = ds.exists() ? { id: ds.id, ...ds.data() } : null;
+    lotteryState.mine = es.exists() ? (es.data().count || 0) : 0;
+  } catch (e) {
+    console.error('[upoint] lottery load failed', e);
+  }
+  renderLottery();
+}
+
+function renderLottery() {
+  const box = document.getElementById('lottery-panel');
+  if (!box) return;
+  const t = lt();
+  const d = lotteryState.draw;
+  const cd = lotteryCurrentDraw();
+  if (!d) { box.innerHTML = `<p class="lottery-muted">${t.noDraw}</p>`; return; }
+  const total = Math.max(d.totalTickets || 0, lotteryState.mine);
+  const pool = d.pool || 0;
+  const open = d.status === 'open' && Date.now() < (d.closeAt?.toMillis?.() || 0);
+  const left = Math.max(0, LOTTERY_CAP - lotteryState.mine);
+  const afford = Math.floor((latestUkoPoints || 0) / LOTTERY_PRICE);
+  const maxQty = Math.max(0, Math.min(left, afford));
+  lotteryState.qty = Math.min(Math.max(1, lotteryState.qty), Math.max(1, maxQty));
+  const chance = total > 0 && lotteryState.mine > 0 ? `${(lotteryState.mine / total * 100).toFixed(1)}%` : '–';
+  box.innerHTML = `
+    ${LOTTERY_PUBLIC ? '' : `<p class="lottery-test">${t.test}</p>`}
+    <p class="lottery-when">${t.when(cd.label)}</p>
+    <div class="lottery-stats">
+      <div><small>${t.pool}</small><b>${pool.toLocaleString()}<span>UP</span></b></div>
+      <div><small>${t.first}</small><b>${Math.floor(pool * 0.6).toLocaleString()}<span>UP</span></b></div>
+      <div><small>${t.tickets}</small><b>${total.toLocaleString()}</b></div>
+      <div><small>${t.people}</small><b>${(d.participants || 0).toLocaleString()}</b></div>
+    </div>
+    <p class="lottery-muted">${t.note}</p>
+    <p class="lottery-mine">${t.mine}: <b>${lotteryState.mine}</b> / ${LOTTERY_CAP} ・ ${t.chance}: <b>${chance}</b></p>
+    <p class="lottery-rule">${t.rule}<br>${t.prizes}</p>
+    ${open ? `<div class="lottery-buy">
+      <button type="button" class="lottery-step" data-d="-10">−10</button>
+      <button type="button" class="lottery-step" data-d="-1">−1</button>
+      <span class="lottery-qty">${maxQty ? lotteryState.qty : 0}</span>
+      <button type="button" class="lottery-step" data-d="1">+1</button>
+      <button type="button" class="lottery-step" data-d="10">+10</button>
+      <button type="button" class="lottery-buy-btn" id="lottery-buy-btn" ${maxQty && !lotteryState.busy ? '' : 'disabled'}>${t.buy(maxQty ? lotteryState.qty : 0)}</button>
+    </div>` : `<p class="lottery-muted">${t.closed}</p>`}`;
+  box.querySelectorAll('.lottery-step').forEach((b) => b.addEventListener('click', () => {
+    lotteryState.qty = Math.min(Math.max(1, lotteryState.qty + Number(b.dataset.d)), Math.max(1, maxQty));
+    renderLottery();
+  }));
+  const bb = document.getElementById('lottery-buy-btn');
+  if (bb) bb.addEventListener('click', () => buyLottery(lotteryState.qty));
+}
+
+async function buyLottery(qty) {
+  const t = lt();
+  const d = lotteryState.draw;
+  if (!d || lotteryState.busy || qty < 1) return;
+  if (!confirm(t.confirm(qty))) return;
+  lotteryState.busy = true; renderLottery();
+  const userId = getUserId();
+  const userRef = doc(db, 'omikujiUsers', userId);
+  const entryRef = doc(db, 'ukoLotteryEntries', `${d.id}_${userId}`);
+  const drawRef = doc(db, 'ukoLottery', d.id);
+  let newTotal = 0;
+  try {
+    await runTransaction(db, async (tx) => {
+      const us = await tx.get(userRef);
+      const es = await tx.get(entryRef);
+      const ds = await tx.get(drawRef);
+      if (!us.exists()) throw new Error('NO_USER_DOC');
+      const dd = ds.exists() ? ds.data() : null;
+      if (!dd || dd.status !== 'open' || Date.now() >= dd.closeAt.toMillis()) throw new Error('CLOSED');
+      if (LOTTERY_PUBLIC && myRole === 'admin') throw new Error('ADMIN');
+      const data = us.data();
+      if ((data.achStats?.totalCount || 0) < LOTTERY_MIN_DRAWS && myRole !== 'admin') throw new Error('COND');
+      const cost = qty * LOTTERY_PRICE;
+      if ((data.ukoPoints || 0) < cost) throw new Error('POINTS');
+      const had = es.exists() ? (es.data().count || 0) : 0;
+      if (had + qty > LOTTERY_CAP) throw new Error('CAP');
+      newTotal = had + qty;
+      tx.update(userRef, { ukoPoints: increment(-cost) });
+      tx.set(entryRef, { drawId: d.id, userId, name: data.name || '', count: newTotal, updatedAt: serverTimestamp() });
+      tx.set(doc(collection(db, 'ukoPointsLog')), {
+        userId, amount: -cost, type: 'lotteryBuy', meta: { drawId: d.id, qty, total: newTotal }, createdAt: serverTimestamp(),
+      });
+    });
+    lotteryState.mine = newTotal;
+    showToast(t.done(qty, newTotal));
+  } catch (e) {
+    const map = { POINTS: t.errPoints, CAP: t.errCap, CLOSED: t.errClosed, COND: t.errCond, ADMIN: t.errAdmin };
+    if (!map[e.message]) console.error('[upoint] lottery buy failed', e);
+    showToast(map[e.message] || t.errFail, true);
+  } finally {
+    lotteryState.busy = false;
+    renderLottery();
+  }
 }
 
 // ===== 初期化 =====

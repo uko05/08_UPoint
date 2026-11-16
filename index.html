@@ -19,7 +19,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@uko_dayo_">
     <meta name="robots" content="noindex">
-    <link rel="stylesheet" href="style.css?v=2.7">
+    <link rel="stylesheet" href="style.css?v=2.8">
 
     <!-- Favicon -->
     <link rel="icon" href="https://cdn.jsdelivr.net/gh/uko05/99_SharedImage@main/00_common/favicon_io/favicon.ico" type="image/x-icon">
@@ -51,6 +51,7 @@
         <div class="tab-bar">
             <button type="button" class="tab-btn active" data-tab="exchange" data-i18n="tabExchange">交換</button>
             <button type="button" class="tab-btn" data-tab="missions" data-i18n="tabMissions">ミッション</button>
+            <button type="button" class="tab-btn" data-tab="lottery" id="tab-btn-lottery" data-i18n="tabLottery" hidden>宝くじ</button>
         </div>
 
         <section class="items-section tab-panel" id="tab-panel-exchange">
@@ -61,6 +62,11 @@
         <section class="items-section tab-panel" id="tab-panel-missions" hidden>
             <h2 data-i18n="missionsTitle">UPを貯める方法</h2>
             <div class="site-group-list" id="mission-group-list"></div>
+        </section>
+
+        <section class="items-section tab-panel" id="tab-panel-lottery" hidden>
+            <h2 data-i18n="lotteryTitle">UP宝くじ</h2>
+            <div id="lottery-panel" class="lottery-panel"></div>
         </section>
     </main>
 
@@ -77,9 +83,9 @@
         <span id="uko-account-status-slot"></span>
     </footer>
 
-    <span id="site-version" class="site-version">v2.20</span>
+    <span id="site-version" class="site-version">v2.21</span>
 
-    <script type="module" src="script.js"></script>
+    <script type="module" src="script.js?v=2.21"></script>
     <script src="https://uko05.github.io/TopPage00/shared/sidebar.js"></script>
     <script type="module" src="https://uko05.github.io/24_AccountCenter/account-status.js"></script>
 </body>
