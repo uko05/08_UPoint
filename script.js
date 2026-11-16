@@ -1271,6 +1271,8 @@ const LOT = {
     done: (n, total) => `${n}口買いました（この回の合計 ${total}口）`,
     errPoints: 'UPが足りません', errCap: `1人${LOTTERY_CAP}口までです`, errClosed: '販売は締め切りました',
     errCond: `おみくじを${LOTTERY_MIN_DRAWS}回以上引くと買えるようになります`, errAdmin: '管理者は買えません', errFail: '買えませんでした。もう一度お試しください',
+    firstLabel: '1等の賞金（1人）', firstHint: '＋ 願いの結晶 2個', secondLabel: '2等（1人あたり）', secondHint: '＋ 結晶 1個',
+    thirdLabel: '3等（5人・1人あたり）', thirdHint: '賞金の2%ずつ',
     loading: '読み込み中…', noDraw: '次の回の準備中です。少し待ってから開き直してください。', test: '試しの期間（管理者だけに表示中）',
   },
   en: {
@@ -1284,6 +1286,8 @@ const LOT = {
     done: (n, total) => `Bought ${n} ticket(s) (total ${total} this round)`,
     errPoints: 'Not enough UP', errCap: `Up to ${LOTTERY_CAP} tickets per person`, errClosed: 'Sales are closed',
     errCond: `Draw Omikuji ${LOTTERY_MIN_DRAWS} times to unlock`, errAdmin: 'Admins cannot buy', errFail: 'Purchase failed. Please try again',
+    firstLabel: '1st prize (1 winner)', firstHint: '+ 2 Wish Crystals', secondLabel: '2nd prize (each)', secondHint: '+ 1 crystal',
+    thirdLabel: '3rd prize (5 winners, each)', thirdHint: '2% of the pool each',
     loading: 'Loading…', noDraw: 'The next round is being prepared. Please reopen in a little while.', test: 'Test period (visible to admins only)',
   },
 };
@@ -1339,26 +1343,42 @@ function renderLottery() {
   const maxQty = Math.max(0, Math.min(left, afford));
   lotteryState.qty = Math.min(Math.max(1, lotteryState.qty), Math.max(1, maxQty));
   const chance = total > 0 && lotteryState.mine > 0 ? `${(lotteryState.mine / total * 100).toFixed(1)}%` : '–';
+  const p1 = Math.floor(pool * 0.60), p2 = Math.floor(pool * 0.15), p3 = Math.floor(pool * 0.02);
+  // 2026-11-17: 買う所を上に。賞金は1等を大きく(balance-sectionと同じ見せ方)、その下に2等を2つ横並び、さらに下に3等
   box.innerHTML = `
     ${LOTTERY_PUBLIC ? '' : `<p class="lottery-test">${t.test}</p>`}
     <p class="lottery-when">${t.when(cd.label)}</p>
+    <div class="lottery-buy-box">
+      <p class="lottery-mine">${t.mine}: <b>${lotteryState.mine}</b> / ${LOTTERY_CAP}</p>
+      <p class="lottery-mine">${t.chance}: <b>${chance}</b></p>
+      <p class="lottery-rule">${t.rule}</p>
+      <p class="lottery-rule">${t.prizes}</p>
+      ${open ? `<div class="lottery-buy">
+        <div class="lottery-steps">
+          <button type="button" class="lottery-step" data-d="-10">−10</button>
+          <button type="button" class="lottery-step" data-d="-1">−1</button>
+          <span class="lottery-qty">${maxQty ? lotteryState.qty : 0}</span>
+          <button type="button" class="lottery-step" data-d="1">+1</button>
+          <button type="button" class="lottery-step" data-d="10">+10</button>
+        </div>
+        <button type="button" class="lottery-buy-btn" id="lottery-buy-btn" ${maxQty && !lotteryState.busy ? '' : 'disabled'}>${t.buy(maxQty ? lotteryState.qty : 0)}</button>
+      </div>` : `<p class="lottery-muted">${t.closed}</p>`}
+    </div>
+    <section class="balance-section lottery-first">
+      <p class="balance-label">${t.firstLabel}</p>
+      <p class="balance-value">${p1.toLocaleString()}<span class="balance-unit">UP</span></p>
+      <p class="balance-hint">${t.firstHint}</p>
+    </section>
+    <div class="lottery-second">
+      ${[0, 1].map(() => `<div class="lottery-prize"><small>${t.secondLabel}</small><b>${p2.toLocaleString()}<span>UP</span></b><em>${t.secondHint}</em></div>`).join('')}
+    </div>
+    <div class="lottery-prize lottery-third"><small>${t.thirdLabel}</small><b>${p3.toLocaleString()}<span>UP</span></b><em>${t.thirdHint}</em></div>
     <div class="lottery-stats">
       <div><small>${t.pool}</small><b>${pool.toLocaleString()}<span>UP</span></b></div>
-      <div><small>${t.first}</small><b>${Math.floor(pool * 0.6).toLocaleString()}<span>UP</span></b></div>
       <div><small>${t.tickets}</small><b>${total.toLocaleString()}</b></div>
       <div><small>${t.people}</small><b>${(d.participants || 0).toLocaleString()}</b></div>
     </div>
-    <p class="lottery-muted">${t.note}</p>
-    <p class="lottery-mine">${t.mine}: <b>${lotteryState.mine}</b> / ${LOTTERY_CAP} ・ ${t.chance}: <b>${chance}</b></p>
-    <p class="lottery-rule">${t.rule}<br>${t.prizes}</p>
-    ${open ? `<div class="lottery-buy">
-      <button type="button" class="lottery-step" data-d="-10">−10</button>
-      <button type="button" class="lottery-step" data-d="-1">−1</button>
-      <span class="lottery-qty">${maxQty ? lotteryState.qty : 0}</span>
-      <button type="button" class="lottery-step" data-d="1">+1</button>
-      <button type="button" class="lottery-step" data-d="10">+10</button>
-      <button type="button" class="lottery-buy-btn" id="lottery-buy-btn" ${maxQty && !lotteryState.busy ? '' : 'disabled'}>${t.buy(maxQty ? lotteryState.qty : 0)}</button>
-    </div>` : `<p class="lottery-muted">${t.closed}</p>`}`;
+    <p class="lottery-muted">${t.note}</p>`;
   box.querySelectorAll('.lottery-step').forEach((b) => b.addEventListener('click', () => {
     lotteryState.qty = Math.min(Math.max(1, lotteryState.qty + Number(b.dataset.d)), Math.max(1, maxQty));
     renderLottery();

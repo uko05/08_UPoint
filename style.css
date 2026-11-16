@@ -141,19 +141,29 @@ main {
 .lottery-panel { display: flex; flex-direction: column; gap: 10px; }
 .lottery-test { font-size: 0.75rem; color: #b45309; background: #fff7e6; border-radius: 8px; padding: 6px 10px; margin: 0; }
 .lottery-when { font-size: 0.85rem; font-weight: bold; margin: 0; }
-.lottery-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.lottery-stats div { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; }
-.lottery-stats small { display: block; font-size: 0.72rem; color: var(--muted); }
-.lottery-stats b { font-size: 1.25rem; color: var(--gold); }
-.lottery-stats b span { font-size: 0.75rem; margin-left: 2px; color: var(--muted); }
-.lottery-muted { font-size: 0.75rem; color: var(--muted); margin: 0; }
+.lottery-buy-box { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
 .lottery-mine { font-size: 0.85rem; margin: 0; }
 .lottery-rule { font-size: 0.75rem; color: var(--muted); line-height: 1.6; margin: 0; }
-.lottery-buy { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.lottery-buy { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 6px; }
+.lottery-steps { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .lottery-step { font-family: inherit; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-.lottery-qty { min-width: 40px; text-align: center; font-weight: bold; font-size: 1.1rem; }
-.lottery-buy-btn { font-family: inherit; font-weight: bold; border: none; border-radius: 999px; padding: 8px 18px; background: var(--accent); color: #4a3600; cursor: pointer; margin-left: auto; }
+.lottery-qty { min-width: 44px; text-align: center; font-weight: bold; font-size: 1.15rem; }
+.lottery-buy-btn { font-family: inherit; font-weight: bold; border: none; border-radius: 999px; padding: 10px 28px; background: var(--accent); color: #4a3600; cursor: pointer; }
 .lottery-buy-btn:disabled { opacity: 0.5; cursor: default; }
+.lottery-first { margin-bottom: 0; }
+.lottery-second { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lottery-prize { border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; text-align: center; background: var(--surface); }
+.lottery-prize small { display: block; font-size: 0.75rem; color: var(--muted); }
+.lottery-prize b { display: block; font-size: 1.4rem; color: var(--gold); }
+.lottery-prize b span { font-size: 0.8rem; margin-left: 2px; color: var(--muted); }
+.lottery-prize em { display: block; font-style: normal; font-size: 0.72rem; color: var(--muted); }
+.lottery-third b { font-size: 1.15rem; }
+.lottery-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.lottery-stats div { border: 1px solid var(--border); border-radius: 12px; padding: 8px 10px; text-align: center; }
+.lottery-stats small { display: block; font-size: 0.72rem; color: var(--muted); }
+.lottery-stats b { font-size: 1rem; }
+.lottery-stats b span { font-size: 0.72rem; margin-left: 2px; color: var(--muted); }
+.lottery-muted { font-size: 0.75rem; color: var(--muted); margin: 0; }
 
 .items-section h2 {
   font-size: 1rem;
