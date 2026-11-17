@@ -939,6 +939,8 @@ getDoc(doc(db, 'sharedUserRoles', getUserId())).then((snap) => {
   if (myRole !== 'general') renderSiteGroups();
   const lb = document.getElementById('tab-btn-lottery');
   if (lb) lb.hidden = !isLotteryVisible();
+  // ?tab=lottery で開かれたら(おみくじのフィードの宝くじの投稿から)、宝くじタブを開く(2026-11-17)
+  if (lb && !lb.hidden && new URLSearchParams(location.search).get('tab') === 'lottery') lb.click();
 }).catch((e) => console.error('[upoint] role load failed', e));
 const isItemVisible = (item) => !item.visibleRoles || item.visibleRoles.includes(myRole);
 
