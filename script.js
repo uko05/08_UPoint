@@ -1262,7 +1262,7 @@ const LOTTERY_PRICE = 10, LOTTERY_POOL_PER = 8, LOTTERY_CAP = 200, LOTTERY_MIN_D
 const isLotteryVisible = () => LOTTERY_PUBLIC || myRole === 'admin';
 const LOT = {
   ja: {
-    when: (d) => `${d} 21:00 締め切り・22:00 結果発表（結果はおみくじの「宝くじ」タブ）`,
+    when: (c, r) => `${c} 締め切り・${r} 結果発表（結果はおみくじの「宝くじ」タブ）`,
     pool: '賞金の合計', first: '1等の賞金', tickets: '全体の口数', people: '参加者',
     note: '（開いた時点の数字です）',
     carriedIn: '前の回からの持ち越し（口数・賞金）を含みます',
@@ -1279,7 +1279,7 @@ const LOT = {
     loading: '読み込み中…', noDraw: '次の回の準備中です。少し待ってから開き直してください。', test: '試しの期間（管理者だけに表示中）',
   },
   en: {
-    when: (d) => `Sales close ${d} 21:00 JST, results at 22:00 (see the Lottery tab on Omikuji)`,
+    when: (c, r) => `Sales close ${c} JST, results ${r} (see the Lottery tab on Omikuji)`,
     pool: 'Total prize', first: '1st prize', tickets: 'Tickets sold', people: 'Players',
     note: '(as of when you opened this tab)',
     carriedIn: 'Includes tickets and prize carried over from the previous round',
@@ -1299,20 +1299,39 @@ const LOT = {
 const lt = () => LOT[currentLang()] || LOT.ja;
 
 // サーバー(lottery.js)と同じ決め方: 結果発表(22時)がまだ来ていない一番近い1日か16日
-function lotteryCurrentDraw(nowMs = Date.now()) {
+// 試しの期間(2026-11-17。ukoLotteryConfig/main の testUntil・testIntervalMin)なら、その間隔の回(名前は T+発表時刻、締め切りは5分前)
+function lotteryTestSlot(nowMs, cfg, back = 0) {
+  const until = cfg && cfg.testUntil && cfg.testUntil.toMillis ? cfg.testUntil.toMillis() : 0;
+  if (!(until > nowMs && cfg.testIntervalMin > 0)) return null;
+  const pad = (n) => String(n).padStart(2, '0');
+  const iv = cfg.testIntervalMin * 60e3;
+  const res = Math.floor(nowMs / iv) * iv + iv - back * iv;
+  const j = new Date(res + 9 * 3600e3);
+  const id = `T${j.getUTCFullYear()}${pad(j.getUTCMonth() + 1)}${pad(j.getUTCDate())}-${pad(j.getUTCHours())}${pad(j.getUTCMinutes())}`;
+  return { drawId: id, id, closeMs: res - 5 * 60e3, resultMs: res };
+}
+// 日時の表示(日本時間 M/D HH:MM)
+function lotteryFmt(ms) {
+  const j = new Date(ms + 9 * 3600e3);
+  return `${j.getUTCMonth() + 1}/${j.getUTCDate()} ${String(j.getUTCHours()).padStart(2, '0')}:${String(j.getUTCMinutes()).padStart(2, '0')}`;
+}
+function lotteryCurrentDraw(nowMs = Date.now(), cfg = lotteryCfg) {
+  const ts = lotteryTestSlot(nowMs, cfg);
+  if (ts) return ts;
   const pad = (n) => String(n).padStart(2, '0');
   const j = new Date(nowMs + 9 * 3600e3);
   let y = j.getUTCFullYear(), m = j.getUTCMonth() + 1;
   for (let k = 0; k < 3; k++) {
     for (const day of [1, 16]) {
       const res = Date.UTC(y, m - 1, day, 22 - 9);
-      if (res > nowMs) return { drawId: `${y}-${pad(m)}-${pad(day)}`, label: `${m}/${day}` };
+      if (res > nowMs) return { drawId: `${y}-${pad(m)}-${pad(day)}`, closeMs: res - 3600e3, resultMs: res };
     }
     m += 1; if (m > 12) { m = 1; y += 1; }
   }
   return null;
 }
 
+let lotteryCfg = {};
 const lotteryState = { draw: null, mine: 0, qty: 10, busy: false, live: null };
 
 // 今の口数と参加者を、その場で数える(合計を数える集計なので、読み取りは参加者1,000人ごとに1回分)。
@@ -1331,8 +1350,12 @@ async function lotteryLiveCount(drawId) {
 async function loadLottery() {
   const box = document.getElementById('lottery-panel');
   if (!box || !isLotteryVisible()) return;
-  const cd = lotteryCurrentDraw();
   box.innerHTML = `<p class="lottery-muted">${lt().loading}</p>`;
+  try {
+    const cs = await getDoc(doc(db, 'ukoLotteryConfig', 'main'));
+    lotteryCfg = cs.exists() ? cs.data() : {};
+  } catch (e) { lotteryCfg = {}; }
+  const cd = lotteryCurrentDraw();
   try {
     const [ds, es, live] = await Promise.all([
       getDoc(doc(db, 'ukoLottery', cd.drawId)),
@@ -1370,7 +1393,7 @@ function renderLottery() {
   // 2026-11-17: 買う所を上に。賞金は1等を大きく(balance-sectionと同じ見せ方)、その下に2等を2つ横並び、さらに下に3等
   box.innerHTML = `
     ${LOTTERY_PUBLIC ? '' : `<p class="lottery-test">${t.test}</p>`}
-    <p class="lottery-when">${t.when(cd.label)}</p>
+    <p class="lottery-when">${t.when(lotteryFmt(cd.closeMs), lotteryFmt(cd.resultMs).split(' ')[1])}</p>
     <div class="lottery-buy-box">
       <p class="lottery-mine">${t.mine}: <b>${lotteryState.mine}</b> / ${LOTTERY_CAP}</p>
       <p class="lottery-mine">${t.chance}: <b>${chance}</b></p>
