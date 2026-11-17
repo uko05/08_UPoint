@@ -1426,9 +1426,10 @@ function renderLottery() {
   // 2026-11-17: 買う所を上に。賞金は1等を大きく(balance-sectionと同じ見せ方)、その下に2等を2つ横並び、さらに下に3等
   box.innerHTML = `
     ${LOTTERY_PUBLIC ? '' : `<p class="lottery-test">${t.test}</p>`}
-    <p class="lottery-title">${lotteryRoundTitle(cd.drawId, currentLang() === 'en')}</p>
-    <p class="lottery-countdown" id="lottery-cd"></p>
-    <p class="lottery-when">${t.when(lotteryFmt(cd.closeMs), lotteryFmt(cd.resultMs).split(' ')[1])}</p>
+    <div class="lottery-hero">
+      <p class="lottery-title">${lotteryRoundTitle(cd.drawId, currentLang() === 'en')}</p>
+      <p class="lottery-countdown" id="lottery-cd"></p>
+    </div>
     <div class="lottery-buy-box">
       <p class="lottery-mine">${t.mine}: <b>${lotteryState.mine}</b> / ${LOTTERY_CAP}</p>
       <p class="lottery-mine">${t.chance}: <b>${chance}</b></p>

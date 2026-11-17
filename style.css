@@ -168,6 +168,27 @@ main {
 .lottery-stats b { font-size: 1rem; }
 .lottery-stats b span { font-size: 0.72rem; margin-left: 2px; color: var(--muted); }
 .lottery-muted { font-size: 0.75rem; color: var(--muted); margin: 0; }
+.lottery-buy-box { background: #fffdf6; border-color: #f3dfa8; }
+
+/* 2026-11-17: 色付け(タイトルとカウントダウンは金の帯、1等=金・2等=銀・3等=銅) */
+.lottery-hero { background: linear-gradient(135deg, #fff6cf 0%, #ffe28a 55%, #ffd257 100%); border: 1px solid #f1c232; border-radius: 14px; padding: 12px 14px; text-align: center; }
+.lottery-hero .lottery-title { color: #6b4500; letter-spacing: 0.04em; }
+.lottery-hero .lottery-cd-close { color: #a14a00; }
+.lottery-hero .lottery-cd-result { color: #7a5a1a; }
+.lottery-first { background: linear-gradient(180deg, #fffbea 0%, #fff0bf 100%); border: 1px solid #efc44a; }
+.lottery-first .balance-label, .lottery-first small { color: #8a6100; font-weight: bold; }
+.lottery-first .balance-value, .lottery-first b { color: #c48a00; }
+.lottery-first .balance-hint, .lottery-first em { color: #8a6100; }
+.lottery-second .lottery-prize { background: linear-gradient(180deg, #fbfcfe 0%, #eef1f6 100%); border-color: #c3cad6; }
+.lottery-second .lottery-prize small, .lottery-second .lottery-prize em { color: #5a6475; }
+.lottery-second .lottery-prize b { color: #6b7688; }
+.lottery-third { background: linear-gradient(180deg, #fff8f2 0%, #fbe6d6 100%); border-color: #e3b48e; }
+.lottery-third small, .lottery-third em { color: #8a5230; }
+.lottery-third b { color: #b0643a; }
+.lottery-stats div { background: #fffaf0; border: 1px solid #f3dfa8; }
+.lottery-stats small { color: #8a6a2a; }
+.lottery-stats b { color: #6b4500; }
+
 
 .items-section h2 {
   font-size: 1rem;
