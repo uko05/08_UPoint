@@ -1263,7 +1263,7 @@ const isLotteryVisible = () => LOTTERY_PUBLIC || myRole === 'admin';
 const LOT = {
   ja: {
     when: (c, r) => `${c} 締め切り・${r} 結果発表（結果はおみくじの「宝くじ」タブ）`,
-    pool: '賞金の合計', first: '1等の賞金', tickets: '全体の口数', people: '参加者',
+    pool: '賞金の合計', first: '1等の賞金', tickets: '全体の口数', myTickets: '購入口数', people: '参加者',
     note: '（開いた時点の数字です）',
     carriedIn: '前の回からの持ち越し（口数・賞金）を含みます',
     minPeople: '参加者が8人以下の回は抽選せず、口数と賞金をそのまま次の回へ持ち越します。', mine: 'あなたの口数', chance: '1等に当たる確率の目安',
@@ -1280,7 +1280,7 @@ const LOT = {
   },
   en: {
     when: (c, r) => `Sales close ${c} JST, results ${r} (see the Lottery tab on Omikuji)`,
-    pool: 'Total prize', first: '1st prize', tickets: 'Tickets sold', people: 'Players',
+    pool: 'Total prize', first: '1st prize', tickets: 'Tickets sold', myTickets: 'Your tickets', people: 'Players',
     note: '(as of when you opened this tab)',
     carriedIn: 'Includes tickets and prize carried over from the previous round',
     minPeople: 'If 8 or fewer people join, the draw is carried over to the next round with all tickets and the prize.', mine: 'Your tickets', chance: 'Chance of 1st prize',
@@ -1332,6 +1332,16 @@ function lotteryCurrentDraw(nowMs = Date.now(), cfg = lotteryCfg) {
 }
 
 // カウントダウン(2026-11-17)。「締め切りまで 残り08日 10:25:10（11/16 21:00）」の形。端末の時計で1秒ごとに書き換えるだけ(読み書きなし)
+// 回のタイトル(2026-11-17)。本番は 2026-12-01 を第1回として1日・16日ごとに数える。試しの回は「試し HH:MM の回」
+function lotteryRoundTitle(drawId, en) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(drawId || '');
+  if (m) {
+    const n = (Number(m[1]) - 2026) * 24 + (Number(m[2]) - 12) * 2 + (Number(m[3]) === 16 ? 1 : 0) + 1;
+    return en ? `UP Lottery #${n}` : `第${n}回UP宝くじ`;
+  }
+  const t = /-(\d{2})(\d{2})$/.exec(drawId || '');
+  return en ? `UP Lottery (test ${t ? `${t[1]}:${t[2]}` : ''})` : `UP宝くじ（試し ${t ? `${t[1]}:${t[2]}` : ''}の回）`;
+}
 let lotteryCdTimer = null;
 function lotteryCountdown(el, closeMs, resultMs, en) {
   if (lotteryCdTimer) clearInterval(lotteryCdTimer);
@@ -1339,14 +1349,17 @@ function lotteryCountdown(el, closeMs, resultMs, en) {
   const tick = () => {
     if (!el.isConnected) { clearInterval(lotteryCdTimer); lotteryCdTimer = null; return; }
     const now = Date.now();
-    const target = now < closeMs ? closeMs : resultMs;
-    if (now >= resultMs) { el.textContent = en ? 'Results coming soon! Check the feed.' : 'まもなく発表！ フィードをチェック'; return; }
-    let sec = Math.max(0, Math.floor((target - now) / 1000));
-    const d = Math.floor(sec / 86400); sec -= d * 86400;
-    const h = Math.floor(sec / 3600); sec -= h * 3600;
-    const m = Math.floor(sec / 60); sec -= m * 60;
-    const label = now < closeMs ? (en ? 'Sales close in' : '締め切りまで') : (en ? 'Results in' : '結果発表まで');
-    el.textContent = `${label} ${en ? '' : '残り'}${p2(d)}${en ? 'd' : '日'} ${p2(h)}:${p2(m)}:${p2(sec)}（${lotteryFmt(target)}）`;
+    // 2026-11-17: 「購入締め切りまで」と「結果発表まで」を2行に分けて、どちらの時刻か分かるように
+    const left = (target) => {
+      let sec = Math.max(0, Math.floor((target - now) / 1000));
+      const d = Math.floor(sec / 86400); sec -= d * 86400;
+      const h = Math.floor(sec / 3600); sec -= h * 3600;
+      const m = Math.floor(sec / 60); sec -= m * 60;
+      return `${en ? '' : '残り'}${p2(d)}${en ? 'd' : '日'} ${p2(h)}:${p2(m)}:${p2(sec)}（${lotteryFmt(target)}）`;
+    };
+    const line1 = now < closeMs ? `${en ? 'Sales close in' : '購入締め切りまで'} ${left(closeMs)}` : (en ? 'Sales closed' : '購入は締め切りました');
+    const line2 = now < resultMs ? `${en ? 'Results in' : '結果発表まで'} ${left(resultMs)}` : (en ? 'Results coming soon! Check the feed.' : 'まもなく発表！ フィードをチェック');
+    el.innerHTML = `<span class="lottery-cd-close">${line1}</span><span class="lottery-cd-result">${line2}</span>`;
   };
   tick();
   lotteryCdTimer = setInterval(tick, 1000);
@@ -1413,6 +1426,7 @@ function renderLottery() {
   // 2026-11-17: 買う所を上に。賞金は1等を大きく(balance-sectionと同じ見せ方)、その下に2等を2つ横並び、さらに下に3等
   box.innerHTML = `
     ${LOTTERY_PUBLIC ? '' : `<p class="lottery-test">${t.test}</p>`}
+    <p class="lottery-title">${lotteryRoundTitle(cd.drawId, currentLang() === 'en')}</p>
     <p class="lottery-countdown" id="lottery-cd"></p>
     <p class="lottery-when">${t.when(lotteryFmt(cd.closeMs), lotteryFmt(cd.resultMs).split(' ')[1])}</p>
     <div class="lottery-buy-box">
@@ -1444,6 +1458,7 @@ function renderLottery() {
     <div class="lottery-stats">
       <div><small>${t.pool}</small><b>${pool.toLocaleString()}<span>UP</span></b></div>
       <div><small>${t.tickets}</small><b>${total.toLocaleString()}</b></div>
+      <div><small>${t.myTickets}</small><b>${lotteryState.mine.toLocaleString()}</b></div>
       <div><small>${t.people}</small><b>${people.toLocaleString()}</b></div>
     </div>
     ${d.carriedFrom ? `<p class="lottery-muted">${t.carriedIn}</p>` : ''}

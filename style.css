@@ -141,7 +141,10 @@ main {
 .lottery-panel { display: flex; flex-direction: column; gap: 10px; }
 .lottery-test { font-size: 0.75rem; color: #b45309; background: #fff7e6; border-radius: 8px; padding: 6px 10px; margin: 0; }
 .lottery-when { font-size: 0.78rem; color: var(--muted); margin: 0; }
-.lottery-countdown { font-size: 1.05rem; font-weight: bold; margin: 0; text-align: center; font-variant-numeric: tabular-nums; }
+.lottery-title { font-size: 1.15rem; font-weight: bold; text-align: center; margin: 0; }
+.lottery-countdown { margin: 0; text-align: center; font-variant-numeric: tabular-nums; display: flex; flex-direction: column; gap: 2px; }
+.lottery-cd-close { font-size: 1rem; font-weight: bold; }
+.lottery-cd-result { font-size: 0.85rem; color: var(--muted); }
 .lottery-buy-box { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
 .lottery-mine { font-size: 0.85rem; margin: 0; }
 .lottery-rule { font-size: 0.75rem; color: var(--muted); line-height: 1.6; margin: 0; }
@@ -159,7 +162,7 @@ main {
 .lottery-prize b span { font-size: 0.8rem; margin-left: 2px; color: var(--muted); }
 .lottery-prize em { display: block; font-style: normal; font-size: 0.72rem; color: var(--muted); }
 .lottery-third b { font-size: 1.15rem; }
-.lottery-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.lottery-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .lottery-stats div { border: 1px solid var(--border); border-radius: 12px; padding: 8px 10px; text-align: center; }
 .lottery-stats small { display: block; font-size: 0.72rem; color: var(--muted); }
 .lottery-stats b { font-size: 1rem; }
