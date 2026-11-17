@@ -1331,6 +1331,26 @@ function lotteryCurrentDraw(nowMs = Date.now(), cfg = lotteryCfg) {
   return null;
 }
 
+// カウントダウン(2026-11-17)。「締め切りまで 残り08日 10:25:10（11/16 21:00）」の形。端末の時計で1秒ごとに書き換えるだけ(読み書きなし)
+let lotteryCdTimer = null;
+function lotteryCountdown(el, closeMs, resultMs, en) {
+  if (lotteryCdTimer) clearInterval(lotteryCdTimer);
+  const p2 = (n) => String(n).padStart(2, '0');
+  const tick = () => {
+    if (!el.isConnected) { clearInterval(lotteryCdTimer); lotteryCdTimer = null; return; }
+    const now = Date.now();
+    const target = now < closeMs ? closeMs : resultMs;
+    if (now >= resultMs) { el.textContent = en ? 'Results coming soon! Check the feed.' : 'まもなく発表！ フィードをチェック'; return; }
+    let sec = Math.max(0, Math.floor((target - now) / 1000));
+    const d = Math.floor(sec / 86400); sec -= d * 86400;
+    const h = Math.floor(sec / 3600); sec -= h * 3600;
+    const m = Math.floor(sec / 60); sec -= m * 60;
+    const label = now < closeMs ? (en ? 'Sales close in' : '締め切りまで') : (en ? 'Results in' : '結果発表まで');
+    el.textContent = `${label} ${en ? '' : '残り'}${p2(d)}${en ? 'd' : '日'} ${p2(h)}:${p2(m)}:${p2(sec)}（${lotteryFmt(target)}）`;
+  };
+  tick();
+  lotteryCdTimer = setInterval(tick, 1000);
+}
 let lotteryCfg = {};
 const lotteryState = { draw: null, mine: 0, qty: 10, busy: false, live: null };
 
@@ -1393,6 +1413,7 @@ function renderLottery() {
   // 2026-11-17: 買う所を上に。賞金は1等を大きく(balance-sectionと同じ見せ方)、その下に2等を2つ横並び、さらに下に3等
   box.innerHTML = `
     ${LOTTERY_PUBLIC ? '' : `<p class="lottery-test">${t.test}</p>`}
+    <p class="lottery-countdown" id="lottery-cd"></p>
     <p class="lottery-when">${t.when(lotteryFmt(cd.closeMs), lotteryFmt(cd.resultMs).split(' ')[1])}</p>
     <div class="lottery-buy-box">
       <p class="lottery-mine">${t.mine}: <b>${lotteryState.mine}</b> / ${LOTTERY_CAP}</p>
@@ -1427,6 +1448,8 @@ function renderLottery() {
     </div>
     ${d.carriedFrom ? `<p class="lottery-muted">${t.carriedIn}</p>` : ''}
     <p class="lottery-muted">${t.note}</p>`;
+  const cdEl = document.getElementById('lottery-cd');
+  if (cdEl) lotteryCountdown(cdEl, cd.closeMs, cd.resultMs, currentLang() === 'en');
   box.querySelectorAll('.lottery-step').forEach((b) => b.addEventListener('click', () => {
     lotteryState.qty = Math.min(Math.max(1, lotteryState.qty + Number(b.dataset.d)), Math.max(1, maxQty));
     renderLottery();

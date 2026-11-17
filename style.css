@@ -140,7 +140,8 @@ main {
 /* ===== UP宝くじ(2026-11-17) ===== */
 .lottery-panel { display: flex; flex-direction: column; gap: 10px; }
 .lottery-test { font-size: 0.75rem; color: #b45309; background: #fff7e6; border-radius: 8px; padding: 6px 10px; margin: 0; }
-.lottery-when { font-size: 0.85rem; font-weight: bold; margin: 0; }
+.lottery-when { font-size: 0.78rem; color: var(--muted); margin: 0; }
+.lottery-countdown { font-size: 1.05rem; font-weight: bold; margin: 0; text-align: center; font-variant-numeric: tabular-nums; }
 .lottery-buy-box { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
 .lottery-mine { font-size: 0.85rem; margin: 0; }
 .lottery-rule { font-size: 0.75rem; color: var(--muted); line-height: 1.6; margin: 0; }
