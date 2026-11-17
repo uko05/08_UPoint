@@ -175,15 +175,15 @@ main {
 .lottery-hero .lottery-title { color: #6b4500; letter-spacing: 0.04em; }
 .lottery-hero .lottery-cd-close { color: #a14a00; }
 .lottery-hero .lottery-cd-result { color: #7a5a1a; }
-.lottery-first { background: linear-gradient(135deg, #ffe680 0%, #ffcf3d 45%, #f2b100 100%); border: 1px solid #d99a00; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+.lottery-first { background: linear-gradient(135deg, #fff6d6 0%, #ffe48f 55%, #f9d260 100%); border: 1px solid #e6bd4f; }
 .lottery-first .balance-label, .lottery-first small { color: #5c3a00; font-weight: bold; }
 .lottery-first .balance-value, .lottery-first b { color: #4a2c00; }
 .lottery-first .balance-unit, .lottery-first b span { color: #6b4500; }
 .lottery-first .balance-hint, .lottery-first em { color: #5c3a00; }
-.lottery-second .lottery-prize { background: linear-gradient(180deg, #fbfcfe 0%, #eef1f6 100%); border-color: #c3cad6; }
+.lottery-second .lottery-prize { background: linear-gradient(135deg, #f8fafc 0%, #e6eaf0 55%, #d6dce5 100%); border-color: #bcc4d0; }
 .lottery-second .lottery-prize small, .lottery-second .lottery-prize em { color: #5a6475; }
 .lottery-second .lottery-prize b { color: #6b7688; }
-.lottery-third { background: linear-gradient(180deg, #fff8f2 0%, #fbe6d6 100%); border-color: #e3b48e; }
+.lottery-third { background: linear-gradient(135deg, #fff6ee 0%, #f8dcc6 55%, #efc6a6 100%); border-color: #dcab86; }
 .lottery-third small, .lottery-third em { color: #8a5230; }
 .lottery-third b { color: #b0643a; }
 .lottery-stats div { background: #fffaf0; border: 1px solid #f3dfa8; }
