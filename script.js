@@ -1259,7 +1259,7 @@ function showToast(text, isError) {
 // 1口10UP(8UPが賞金に)・1人1回200口まで・何回でも分けて買える。抽選は毎月1日と16日、21時締め切り・22時発表。
 // 結果は 14_GenshinOmikuji のフィードの「宝くじ」タブで見る。
 // 読み取りはタブを開いた時だけ(回のドキュメント1件+自分の口数1件)。
-const LOTTERY_PUBLIC = false;        // false の間は管理者だけに見える(試しの期間)。公開する時に true にする
+const LOTTERY_PUBLIC = true;         // false の間は管理者だけに見える(試しの期間)。公開する時に true にする
 const LOTTERY_PRICE = 10, LOTTERY_POOL_PER = 8, LOTTERY_CAP = 200, LOTTERY_MIN_DRAWS = 5;
 const isLotteryVisible = () => LOTTERY_PUBLIC || myRole === 'admin';
 const LOT = {
