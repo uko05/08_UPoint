@@ -1269,7 +1269,7 @@ const LOT = {
     note: '（開いた時点の数字です）',
     carriedIn: '前の回からの持ち越し（口数・賞金）を含みます',
     minPeople: '参加者が8人以下の回は抽選せず、口数と賞金をそのまま次の回へ持ち越します。', mine: 'あなたの口数', chance: '1等に当たる確率の目安',
-    prizes: '1等 1人：賞金の60%＋願いの結晶2個 ／ 2等 2人：15%ずつ＋結晶1個 ／ 3等 5人：2%ずつ。当たるのは1人1つまで。',
+    prizes: '1等 1人：賞金の60%＋2,000UP＋願いの結晶2個 ／ 2等 2人：15%＋1,000UPずつ＋結晶1個 ／ 3等 5人：2%＋500UPずつ。当たるのは1人1つまで。',
     rule: `1口${LOTTERY_PRICE}UP（${LOTTERY_POOL_PER}UPが賞金に）。1人${LOTTERY_CAP}口まで、何回でも分けて買えます。`,
     buy: (n) => `${n}口買う（${n * LOTTERY_PRICE}UP）`, closed: '販売は締め切りました。結果発表をお待ちください。',
     confirm: (n) => `UP宝くじを${n}口（${n * LOTTERY_PRICE}UP）買いますか？\n買ったあとの払い戻しはできません。`,
@@ -1277,7 +1277,7 @@ const LOT = {
     errPoints: 'UPが足りません', errCap: `1人${LOTTERY_CAP}口までです`, errClosed: '販売は締め切りました',
     errCond: `おみくじを${LOTTERY_MIN_DRAWS}回以上引くと買えるようになります`, errAdmin: '管理者は買えません', errFail: '買えませんでした。もう一度お試しください',
     firstLabel: '1等の賞金（1人）', firstHint: '＋ 願いの結晶 2個', secondLabel: '2等（1人あたり）', secondHint: '＋ 結晶 1個',
-    thirdLabel: '3等（5人・1人あたり）', thirdHint: '賞金の2%ずつ',
+    thirdLabel: '3等（5人・1人あたり）', thirdHint: '賞金の2%＋500UPずつ',
     loading: '読み込み中…', noDraw: '次の回の準備中です。少し待ってから開き直してください。', test: '試しの期間（管理者だけに表示中）',
   },
   en: {
@@ -1286,7 +1286,7 @@ const LOT = {
     note: '(as of when you opened this tab)',
     carriedIn: 'Includes tickets and prize carried over from the previous round',
     minPeople: 'If 8 or fewer people join, the draw is carried over to the next round with all tickets and the prize.', mine: 'Your tickets', chance: 'Chance of 1st prize',
-    prizes: '1st (1): 60% + 2 Wish Crystals / 2nd (2): 15% each + 1 crystal / 3rd (5): 2% each. One prize per person.',
+    prizes: '1st (1): 60% + 2,000 UP + 2 Wish Crystals / 2nd (2): 15% + 1,000 UP each + 1 crystal / 3rd (5): 2% + 500 UP each. One prize per person.',
     rule: `${LOTTERY_PRICE} UP per ticket (${LOTTERY_POOL_PER} UP goes to the prize). Up to ${LOTTERY_CAP} tickets per person.`,
     buy: (n) => `Buy ${n} (${n * LOTTERY_PRICE} UP)`, closed: 'Sales are closed. Please wait for the results.',
     confirm: (n) => `Buy ${n} UP Lottery ticket(s) for ${n * LOTTERY_PRICE} UP?\nNo refunds.`,
@@ -1294,7 +1294,7 @@ const LOT = {
     errPoints: 'Not enough UP', errCap: `Up to ${LOTTERY_CAP} tickets per person`, errClosed: 'Sales are closed',
     errCond: `Draw Omikuji ${LOTTERY_MIN_DRAWS} times to unlock`, errAdmin: 'Admins cannot buy', errFail: 'Purchase failed. Please try again',
     firstLabel: '1st prize (1 winner)', firstHint: '+ 2 Wish Crystals', secondLabel: '2nd prize (each)', secondHint: '+ 1 crystal',
-    thirdLabel: '3rd prize (5 winners, each)', thirdHint: '2% of the pool each',
+    thirdLabel: '3rd prize (5 winners, each)', thirdHint: '2% of the pool + 500 UP each',
     loading: 'Loading…', noDraw: 'The next round is being prepared. Please reopen in a little while.', test: 'Test period (visible to admins only)',
   },
 };
@@ -1424,7 +1424,8 @@ function renderLottery() {
   const maxQty = Math.max(0, Math.min(left, afford));
   lotteryState.qty = Math.min(Math.max(1, lotteryState.qty), Math.max(1, maxQty));
   const chance = total > 0 && lotteryState.mine > 0 ? `${(lotteryState.mine / total * 100).toFixed(1)}%` : '–';
-  const p1 = Math.floor(pool * 0.60), p2 = Math.floor(pool * 0.15), p3 = Math.floor(pool * 0.02);
+  // 2026-11-19: 割合に、運営の上乗せ(1等+2000・2等+1000・3等+500)を足す。サーバー(lottery.js の TIERS)と同じ
+  const p1 = Math.floor(pool * 0.60) + 2000, p2 = Math.floor(pool * 0.15) + 1000, p3 = Math.floor(pool * 0.02) + 500;
   // 2026-11-17: 買う所を上に。賞金は1等を大きく(balance-sectionと同じ見せ方)、その下に2等を2つ横並び、さらに下に3等
   box.innerHTML = `
     ${LOTTERY_PUBLIC ? '' : `<p class="lottery-test">${t.test}</p>`}
